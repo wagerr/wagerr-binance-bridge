@@ -8,21 +8,21 @@ const getInfo = params => wrapRouterFunction(infoRoutes.getInfo, params);
 describe('Info API', () => {
   describe('#getInfo', () => {
     it('should return the correct fees', async () => {
-      const lokiFee = config.get('loki.withdrawalFee');
+      const wagerrFee = config.get('wagerr.withdrawalFee');
       const { status, success, result } = await getInfo();
       assert.equal(status, 200);
       assert.isTrue(success);
       assert.isNotNull(result);
-      assert.equal(result.fees.loki, lokiFee * 1e9);
+      assert.equal(result.fees.wagerr, wagerrFee * 1e9);
     });
 
     it('should return the correct minimum confirmations', async () => {
-      const minConfirmations = config.get('loki.minConfirmations');
+      const minConfirmations = config.get('wagerr.minConfirmations');
       const { status, success, result } = await getInfo();
       assert.equal(status, 200);
       assert.isTrue(success);
       assert.isNotNull(result);
-      assert.equal(result.minLokiConfirmations, minConfirmations);
+      assert.equal(result.minWagerrConfirmations, minConfirmations);
     });
   });
 });

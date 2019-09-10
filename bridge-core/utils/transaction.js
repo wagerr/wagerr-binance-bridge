@@ -7,23 +7,23 @@ import { TYPE } from './constants';
 export default class TransactionHelper {
   /**
    * Create a helper instance.
-   * @param {{ binance: { client, ourAddress }, loki: { client, minConfirmations }}} config The helper config.
+   * @param {{ binance: { client, ourAddress }, wagerr: { client, minConfirmations }}} config The helper config.
    */
   constructor(config) {
-    const { binance, loki } = config;
+    const { binance, wagerr } = config;
 
     this.bnb = binance.client;
     this.ourBNBAddress = binance.ourAddress;
 
-    this.loki = loki.client;
-    this.minLokiConfirmations = loki.minConfirmations;
+    this.wagerr = wagerr.client;
+    this.minWagerrConfirmations = wagerr.minConfirmations;
   }
 
   /**
    * Get incoming transactions to the given account.
    *
    * @param {any} account The account.
-   * @param {'loki'|'bnb'} accountType The account type.
+   * @param {'wagerr'|'bnb'} accountType The account type.
    * @return {Promise<{ hash, amount }>} An array of incoming transactions
    */
   async getIncomingTransactions(account, accountType) {
@@ -35,13 +35,13 @@ export default class TransactionHelper {
           .filter(tx => tx.memo.trim() === memo.trim())
           .map(({ hash, amount, timestamp }) => ({ hash, amount, timestamp }));
       }
-      case TYPE.LOKI: {
+      case TYPE.WAGERR: {
         const { addressIndex } = account;
 
         // We only want transactions with a certain number of confirmations
-        const transactions = await this.getIncomingLokiTransactions(addressIndex);
+        const transactions = await this.getIncomingWagerrTransactions(addressIndex);
         return transactions
-          .filter(tx => tx.confirmations >= this.minLokiConfirmations)
+          .filter(tx => tx.confirmations >= this.minWagerrConfirmations)
           .map(({ hash, amount, timestamp }) => ({ hash, amount, timestamp }));
       }
       default:
@@ -66,12 +66,12 @@ export default class TransactionHelper {
   }
 
   /**
-   * Get incoming transactions from the given LOKI address.
-   * @param {number} addressIndex The LOKI address index.
+   * Get incoming transactions from the given WAGERR address.
+   * @param {number} addressIndex The WAGERR address index.
    * @param {{ pool: boolean }} options Any additional options
    */
-  async getIncomingLokiTransactions(addressIndex, options = {}) {
-    const transactions = await this.loki.getIncomingTransactions(addressIndex, options);
+  async getIncomingWagerrTransactions(addressIndex, options = {}) {
+    const transactions = await this.wagerr.getIncomingTransactions(addressIndex, options);
     return transactions.map(tx => ({
       ...tx,
       hash: tx.txid,

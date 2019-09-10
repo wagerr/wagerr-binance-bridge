@@ -1,11 +1,11 @@
-# Loki Bridge API
+# Wagerr Bridge API
 
-This is the api server used for the loki bridge application.
+This is the api server used for the wagerr bridge application.
 
 ## Pre-requisites
   - Node 11.15.0
     - This can be installed using [nvm](https://github.com/nvm-sh/nvm)
-  - [Loki wallet rpc](https://github.com/loki-project/loki/releases)
+  - [Wagerr wallet rpc](https://github.com/wagerr-project/wagerr/releases)
 
 ## Installation
 
@@ -56,20 +56,20 @@ To stop run:
 npm stop
 ```
 
-## Loki Wallet RPC
+## Wagerr Wallet RPC
 
-To ensure the server starts, you need to make sure a loki wallet RPC instance is running.
+To ensure the server starts, you need to make sure a wagerr wallet RPC instance is running.
 
 You can do this simply by running the following:
 ```
-loki-wallet-rpc --rpc-login <username>:<password> --rpc-bind-port <port> --daemon-address <address> --wallet-dir <dir> [--testnet]
+wagerr-wallet-rpc --rpc-login <username>:<password> --rpc-bind-port <port> --daemon-address <address> --wallet-dir <dir> [--testnet]
 ```
 
 You will also need to ensure that you have a wallet created to be used with the bridge. Any deposits and swaps will be made using this wallet.
 
-Go into `config/production.json` and edit the values under `loki`.
+Go into `config/production.json` and edit the values under `wagerr`.
 
-For development, you can use `lokitestnet.com:38157` as the `daemon-address`
+For development, you can use `wagerrtestnet.com:38157` as the `daemon-address`
 
 ## Configuration
 
@@ -110,17 +110,17 @@ Any values that you don't set in those files will be fetched from `config/defaul
 | user | The database user |
 | password | The database password |
 
-#### Loki
+#### Wagerr
 
 | Property | Description |
 | --- | --- |
 | minConfirmations | The minimum number of confirmations required before we add the incoming transaction to our swaps |
-| withdrawalFee | The amount of loki to deduct upon withdrawing |
+| withdrawalFee | The amount of wagerr to deduct upon withdrawing |
 | walletRPC.host | The ip or address where the RPC can be accessed |
 | walletRPC.port | The RPC port |
 | walletRPC.username | The RPC username |
 | walletRPC.password | The RPC password |
-| wallet.filename | The name of the wallet to use for swaps.<br>This is where you will receive and send loki |
+| wallet.filename | The name of the wallet to use for swaps.<br>This is where you will receive and send wagerr |
 | wallet.password | The password of the wallet |
 | wallet.accountIndex | The account index to use for the wallet |
 

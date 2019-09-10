@@ -4,15 +4,15 @@ import config from 'config';
 import chalk from 'chalk';
 import Decimal from 'decimal.js';
 import { SWAP_TYPE, TYPE } from 'bridge-core';
-import { db, bnb, loki } from '../core';
+import { db, bnb, wagerr } from '../core';
 import log from '../utils/log';
 
 // The fees in decimal format
-const configFees = { [TYPE.LOKI]: config.get('loki.withdrawalFee') };
+const configFees = { [TYPE.WAGERR]: config.get('wagerr.withdrawalFee') };
 
 const symbols = {
-  [TYPE.LOKI]: 'LOKI',
-  [TYPE.BNB]: 'B-LOKI',
+  [TYPE.WAGERR]: 'WAGERR',
+  [TYPE.BNB]: 'B-WAGERR',
 };
 
 class PriceFetchFailed extends Error {}
@@ -21,7 +21,7 @@ class DailyLimitHit extends Error {}
 
 const module = {
   // The fees in 1e9 format
-  fees: { [TYPE.LOKI]: (parseFloat(configFees[TYPE.LOKI]) * 1e9).toFixed(0) },
+  fees: { [TYPE.WAGERR]: (parseFloat(configFees[TYPE.WAGERR]) * 1e9).toFixed(0) },
 
   Errors: { PriceFetchFailed, NoSwapsToProcess, DailyLimitHit },
   /**
@@ -49,7 +49,7 @@ const module = {
     }
 
     const { swaps, totalAmount } = info;
-    const sentCurrency = swapType === SWAP_TYPE.LOKI_TO_BLOKI ? TYPE.BNB : TYPE.LOKI;
+    const sentCurrency = swapType === SWAP_TYPE.WAGERR_TO_BWAGERR ? TYPE.BNB : TYPE.WAGERR;
 
     log.info(chalk`{green Completed {white.bold ${swaps.length}} swaps}`);
     log.info(chalk`{green Amount sent:} {bold ${totalAmount / 1e9}} {yellow ${symbols[sentCurrency]}}`);
@@ -81,8 +81,8 @@ const module = {
    * @param {string} swapType The type of swap.
    */
   async processAutoSwaps(dailyAmount, dailyLimit, swapType) {
-    // Get the usd price of LOKI and make sure it is valid
-    const usdPrice = await module.getCurrentLokiPriceInUSD();
+    // Get the usd price of WAGERR and make sure it is valid
+    const usdPrice = await module.getCurrentWagerrPriceInUSD();
     if (!usdPrice || usdPrice < 0) throw new PriceFetchFailed();
 
     // Get our pending swaps and their transactions
@@ -129,12 +129,12 @@ const module = {
   },
 
   /**
-   * Get the current price of LOKI
+   * Get the current price of WAGERR
    */
-  async getCurrentLokiPriceInUSD() {
+  async getCurrentWagerrPriceInUSD() {
     try {
-      const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=loki-network&vs_currencies=usd');
-      return response.data['loki-network'].usd;
+      const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=wagerr-network&vs_currencies=usd');
+      return response.data['wagerr-network'].usd;
     } catch (e) {
       log.debug(e);
       throw new PriceFetchFailed();
@@ -156,7 +156,7 @@ const module = {
     const txHashes = await module.send(swapType, transactions);
     await db.updateSwapsTransferTransactionHash(ids, txHashes.join(','));
 
-    const sentCurrency = swapType === SWAP_TYPE.LOKI_TO_BLOKI ? TYPE.BNB : TYPE.LOKI;
+    const sentCurrency = swapType === SWAP_TYPE.WAGERR_TO_BWAGERR ? TYPE.BNB : TYPE.WAGERR;
 
     // This is in 1e9 format
     const transactionAmount = transactions.reduce((total, current) => total + current.amount, 0);
@@ -204,7 +204,7 @@ const module = {
    */
   async send(swapType, transactions) {
   // Multi-send always returns an array of hashes
-    if (swapType === SWAP_TYPE.LOKI_TO_BLOKI) {
+    if (swapType === SWAP_TYPE.WAGERR_TO_BWAGERR) {
       const symbol = config.get('binance.symbol');
       const outputs = transactions.map(({ address, amount }) => ({
         to: address,
@@ -215,19 +215,19 @@ const module = {
       }));
 
       // Send BNB to the users
-      return bnb.multiSend(config.get('binance.mnemonic'), outputs, 'Loki Bridge');
-    } else if (swapType === SWAP_TYPE.BLOKI_TO_LOKI) {
-    // Deduct the loki withdrawal fees
+      return bnb.multiSend(config.get('binance.mnemonic'), outputs, 'Wagerr Bridge');
+    } else if (swapType === SWAP_TYPE.BWAGERR_TO_WAGERR) {
+    // Deduct the wagerr withdrawal fees
       const outputs = transactions.map(({ address, amount }) => {
-        const fee = module.fees[TYPE.LOKI] || 0;
+        const fee = module.fees[TYPE.WAGERR] || 0;
         return {
           address,
           amount: Math.max(0, amount - fee),
         };
       });
 
-      // Send Loki to the users
-      return loki.multiSend(outputs);
+      // Send Wagerr to the users
+      return wagerr.multiSend(outputs);
     }
 
     throw new Error('Invalid swap type');

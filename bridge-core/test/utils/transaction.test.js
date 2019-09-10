@@ -2,7 +2,7 @@ import { assert } from 'chai';
 import sinon from 'sinon';
 import { TYPE } from '../../utils/constants';
 import { TransactionHelper } from '../../utils';
-import { db, bnb, loki } from '../helpers';
+import { db, bnb, wagerr } from '../helpers';
 
 const minConfirmations = 6;
 
@@ -11,8 +11,8 @@ const transaction = new TransactionHelper({
     client: bnb,
     ourAddress: 'ourAddress',
   },
-  loki: {
-    client: loki,
+  wagerr: {
+    client: wagerr,
     minConfirmations,
   },
 });
@@ -70,19 +70,19 @@ describe('Transaction', () => {
       });
     });
 
-    context('Loki', () => {
+    context('Wagerr', () => {
       it('should correctly return the incoming transactions', async () => {
         const mockAPIResult = [{
           txid: 'hash',
           amount: '100',
-          confirmations: transaction.minLokiConfirmations,
+          confirmations: transaction.minWagerrConfirmations,
           timestamp: 100,
         }];
 
-        const stub = sandbox.stub(loki, 'getIncomingTransactions').resolves(mockAPIResult);
+        const stub = sandbox.stub(wagerr, 'getIncomingTransactions').resolves(mockAPIResult);
 
-        const transactions = await transaction.getIncomingTransactions({ addressIndex: 0 }, TYPE.LOKI);
-        assert(stub.calledOnce, 'loki.getIncomingTransactions was not called');
+        const transactions = await transaction.getIncomingTransactions({ addressIndex: 0 }, TYPE.WAGERR);
+        assert(stub.calledOnce, 'wagerr.getIncomingTransactions was not called');
         assert.lengthOf(transactions, 1);
         assert.deepEqual(transactions[0], {
           hash: 'hash',
@@ -98,11 +98,11 @@ describe('Transaction', () => {
           confirmations,
         }));
 
-        sandbox.stub(db, 'getLokiAccount').resolves({ address_index: 0 });
-        const stub = sandbox.stub(loki, 'getIncomingTransactions').resolves(mockAPIResult);
+        sandbox.stub(db, 'getWagerrAccount').resolves({ address_index: 0 });
+        const stub = sandbox.stub(wagerr, 'getIncomingTransactions').resolves(mockAPIResult);
 
-        const transactions = await transaction.getIncomingTransactions({ addressIndex: 0 }, TYPE.LOKI);
-        assert(stub.calledOnce, 'loki.getIncomingTransactions was not called');
+        const transactions = await transaction.getIncomingTransactions({ addressIndex: 0 }, TYPE.WAGERR);
+        assert(stub.calledOnce, 'wagerr.getIncomingTransactions was not called');
         assert.lengthOf(transactions, 2);
         assert.includeMembers(transactions.map(t => t.hash), [minConfirmations, minConfirmations + 1]);
       });

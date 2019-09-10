@@ -1,5 +1,5 @@
 import BinanceClient from './binance';
-import LokiClient from './loki';
+import WagerrClient from './wagerr';
 import PostgresClient from './postgres';
 
-export { BinanceClient, LokiClient, PostgresClient };
+export { BinanceClient, WagerrClient, PostgresClient };

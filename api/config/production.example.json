@@ -9,7 +9,7 @@
     "user": "",
     "password": ""
   },
-  "loki": {
+  "wagerr": {
     "walletRPC": {
       "host": "localhost",
       "port": 18082,

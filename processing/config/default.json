@@ -4,18 +4,18 @@
   "binance": {
     "api": "https://testnet-dex.binance.org",
     "network": "testnet",
-    "symbol": "BLOKI",
+    "symbol": "BWAGERR",
     "mnemonic": ""
   },
   "database": {
     "host": "localhost",
     "port": 5432,
-    "database": "lokibridge",
+    "database": "wagerrbridge",
     "user": "postgres",
     "password": "",
     "ssl": false
   },
-  "loki": {
+  "wagerr": {
     "walletRPC": {
       "host": "localhost",
       "port": 18082,

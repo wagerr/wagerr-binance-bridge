@@ -9,7 +9,7 @@ const sandbox = sinon.createSandbox();
 describe('Database', () => {
   beforeEach(async () => {
     // Clear out any data in the db
-    await postgres.none('TRUNCATE client_accounts, accounts_loki, accounts_bnb, swaps CASCADE;');
+    await postgres.none('TRUNCATE client_accounts, accounts_wagerr, accounts_bnb, swaps CASCADE;');
   });
 
   afterEach(() => {
@@ -27,10 +27,10 @@ describe('Database', () => {
         assert.isNull(account);
       });
 
-      context('Loki Account', () => {
+      context('Wagerr Account', () => {
         it('should return null if the account associated with the client account does not exist', async () => {
           const uuid = '17b42f9e-97b1-11e9-bc42-526af7764f64';
-          await dbHelper.insertClientAccount(uuid, 'address', TYPE.BNB, 'aeb29bf6-97b1-11e9-bc42-526af7764f64', TYPE.LOKI);
+          await dbHelper.insertClientAccount(uuid, 'address', TYPE.BNB, 'aeb29bf6-97b1-11e9-bc42-526af7764f64', TYPE.WAGERR);
 
           const dbClient = await postgres.oneOrNone('select * from client_accounts where uuid = $1;', [uuid]);
           assert.isNotNull(dbClient);
@@ -43,14 +43,14 @@ describe('Database', () => {
           const uuid = '17b42f9e-97b1-11e9-bc42-526af7764f64';
           const address = 'an address';
           const addressType = TYPE.BNB;
-          const accountType = TYPE.LOKI;
+          const accountType = TYPE.WAGERR;
           const accountUuid = 'aeb29bf6-97b1-11e9-bc42-526af7764f64';
           const account = {
             address: 'account address',
             addressIndex: 1,
           };
 
-          await dbHelper.insertLokiAccount(accountUuid, account.address, account.addressIndex);
+          await dbHelper.insertWagerrAccount(accountUuid, account.address, account.addressIndex);
           await dbHelper.insertClientAccount(uuid, address, addressType, accountUuid, accountType);
 
           const client = await db.getClientAccountForUuid(uuid);
@@ -69,7 +69,7 @@ describe('Database', () => {
       context('BNB Account', () => {
         it('should return null if the account associated with the client account does not exist', async () => {
           const uuid = '17b42f9e-97b1-11e9-bc42-526af7764f64';
-          await dbHelper.insertClientAccount(uuid, 'address', TYPE.LOKI, 'aeb29bf6-97b1-11e9-bc42-526af7764f64', TYPE.BNB);
+          await dbHelper.insertClientAccount(uuid, 'address', TYPE.WAGERR, 'aeb29bf6-97b1-11e9-bc42-526af7764f64', TYPE.BNB);
 
           const dbClient = await postgres.oneOrNone('select * from client_accounts where uuid = $1;', [uuid]);
           assert.isNotNull(dbClient);
@@ -81,7 +81,7 @@ describe('Database', () => {
         it('should return the correct client account if it exists', async () => {
           const uuid = '17b42f9e-97b1-11e9-bc42-526af7764f64';
           const address = 'an address';
-          const addressType = TYPE.LOKI;
+          const addressType = TYPE.WAGERR;
           const accountType = TYPE.BNB;
           const accountUuid = 'aeb29bf6-97b1-11e9-bc42-526af7764f64';
           const account = { memo: 'memo' };
@@ -113,9 +113,9 @@ describe('Database', () => {
       });
 
       it('should return nothing if the account attached to the client account does not exist', async () => {
-        // Insert a client account with a `LOKI` account type.
-        await dbHelper.insertClientAccount('07a90576-9dfa-11e9-a2a3-2a2ae2dbcce4', '1', TYPE.BNB, 'abcd', TYPE.LOKI);
-        const results = await db.getClientAccounts(TYPE.LOKI);
+        // Insert a client account with a `WAGERR` account type.
+        await dbHelper.insertClientAccount('07a90576-9dfa-11e9-a2a3-2a2ae2dbcce4', '1', TYPE.BNB, 'abcd', TYPE.WAGERR);
+        const results = await db.getClientAccounts(TYPE.WAGERR);
         assert.isEmpty(results);
       });
 
@@ -129,38 +129,38 @@ describe('Database', () => {
         ];
         await postgres.tx(t => t.batch([
           dbHelper.insertBNBAccount('bnb', 'memo'),
-          dbHelper.insertLokiAccount('loki', 'lokiAddress', 1),
-          dbHelper.insertClientAccount(uuids[0], '1', TYPE.BNB, 'loki', TYPE.LOKI),
-          dbHelper.insertClientAccount(uuids[1], '1', TYPE.BNB, 'loki', TYPE.LOKI),
-          dbHelper.insertClientAccount(uuids[2], '1', TYPE.BNB, 'loki', TYPE.LOKI),
-          dbHelper.insertClientAccount(uuids[3], '1', TYPE.LOKI, 'bnb', TYPE.BNB),
-          dbHelper.insertClientAccount(uuids[4], '1', TYPE.LOKI, 'bnb', TYPE.BNB),
+          dbHelper.insertWagerrAccount('wagerr', 'wagerrAddress', 1),
+          dbHelper.insertClientAccount(uuids[0], '1', TYPE.BNB, 'wagerr', TYPE.WAGERR),
+          dbHelper.insertClientAccount(uuids[1], '1', TYPE.BNB, 'wagerr', TYPE.WAGERR),
+          dbHelper.insertClientAccount(uuids[2], '1', TYPE.BNB, 'wagerr', TYPE.WAGERR),
+          dbHelper.insertClientAccount(uuids[3], '1', TYPE.WAGERR, 'bnb', TYPE.BNB),
+          dbHelper.insertClientAccount(uuids[4], '1', TYPE.WAGERR, 'bnb', TYPE.BNB),
         ]));
 
         const { count } = await postgres.one('select count(*) from client_accounts');
         assert.equal(count, 5);
 
-        const lokiAccounts = await db.getClientAccounts(TYPE.LOKI);
-        assert.lengthOf(lokiAccounts, 3);
+        const wagerrAccounts = await db.getClientAccounts(TYPE.WAGERR);
+        assert.lengthOf(wagerrAccounts, 3);
 
         const bnbAccounts = await db.getClientAccounts(TYPE.BNB);
         assert.lengthOf(bnbAccounts, 2);
       });
 
-      context('Loki Accounts', () => {
+      context('Wagerr Accounts', () => {
         it('should return the accounts in the correct format', async () => {
           const uuid = '07a90576-9dfa-11e9-a2a3-2a2ae2dbcce4';
           const address = '1';
           const addressType = TYPE.BNB;
-          const accountType = TYPE.LOKI;
+          const accountType = TYPE.WAGERR;
 
           await postgres.tx(t => t.batch([
             dbHelper.insertBNBAccount('bnb', 'memo'),
-            dbHelper.insertLokiAccount('loki', 'lokiAddress', 1),
-            dbHelper.insertClientAccount(uuid, address, addressType, 'loki', accountType),
+            dbHelper.insertWagerrAccount('wagerr', 'wagerrAddress', 1),
+            dbHelper.insertClientAccount(uuid, address, addressType, 'wagerr', accountType),
           ]));
 
-          const accounts = await db.getClientAccounts(TYPE.LOKI);
+          const accounts = await db.getClientAccounts(TYPE.WAGERR);
           assert.lengthOf(accounts, 1);
 
           const account = accounts[0];
@@ -170,7 +170,7 @@ describe('Database', () => {
             addressType,
             accountType,
             account: {
-              address: 'lokiAddress',
+              address: 'wagerrAddress',
               addressIndex: 1,
             },
           });
@@ -181,7 +181,7 @@ describe('Database', () => {
         it('should return the accounts in the correct format', async () => {
           const uuid = '07a90576-9dfa-11e9-a2a3-2a2ae2dbcce4';
           const address = '1';
-          const addressType = TYPE.LOKI;
+          const addressType = TYPE.WAGERR;
           const accountType = TYPE.BNB;
 
           await postgres.tx(t => t.batch([
@@ -209,25 +209,25 @@ describe('Database', () => {
         const { count } = await postgres.one('select count(*) from client_accounts');
         assert.equal(count, 0);
 
-        const account = await db.getClientAccount('123', TYPE.LOKI);
+        const account = await db.getClientAccount('123', TYPE.WAGERR);
         assert.isNull(account);
       });
 
-      context('Loki Account', () => {
+      context('Wagerr Account', () => {
         it('should return null if the account attached to the client account does not exist', async () => {
-          // Insert a client account with a `LOKI` account type.
-          await dbHelper.insertClientAccount('07a90576-9dfa-11e9-a2a3-2a2ae2dbcce4', '123', TYPE.BNB, 'abcd', TYPE.LOKI);
+          // Insert a client account with a `WAGERR` account type.
+          await dbHelper.insertClientAccount('07a90576-9dfa-11e9-a2a3-2a2ae2dbcce4', '123', TYPE.BNB, 'abcd', TYPE.WAGERR);
           const account = await db.getClientAccount('123', TYPE.BNB);
           assert.isNull(account);
         });
 
         it('should return the correct values', async () => {
           const uuid = '17b42f9e-97b1-11e9-bc42-526af7764f64';
-          const lokiAddress = '123';
+          const wagerrAddress = '123';
           const bnbAddress = '345';
 
-          await dbHelper.insertLokiAccount('loki', lokiAddress, 0);
-          await dbHelper.insertClientAccount(uuid, bnbAddress, TYPE.BNB, 'loki', TYPE.LOKI);
+          await dbHelper.insertWagerrAccount('wagerr', wagerrAddress, 0);
+          await dbHelper.insertClientAccount(uuid, bnbAddress, TYPE.BNB, 'wagerr', TYPE.WAGERR);
 
           const account = await db.getClientAccount(bnbAddress, TYPE.BNB);
           assert.isNotNull(account);
@@ -235,9 +235,9 @@ describe('Database', () => {
             uuid,
             address: bnbAddress,
             addressType: TYPE.BNB,
-            accountType: TYPE.LOKI,
+            accountType: TYPE.WAGERR,
             account: {
-              address: lokiAddress,
+              address: wagerrAddress,
               addressIndex: 0,
             },
           });
@@ -246,9 +246,9 @@ describe('Database', () => {
 
       context('BNB Account', () => {
         it('should return null if the account attached to the client account does not exist', async () => {
-          // Insert a client account with a `LOKI` account type.
-          await dbHelper.insertClientAccount('07a90576-9dfa-11e9-a2a3-2a2ae2dbcce4', '123', TYPE.LOKI, 'abcd', TYPE.BNB);
-          const account = await db.getClientAccount('123', TYPE.LOKI);
+          // Insert a client account with a `WAGERR` account type.
+          await dbHelper.insertClientAccount('07a90576-9dfa-11e9-a2a3-2a2ae2dbcce4', '123', TYPE.WAGERR, 'abcd', TYPE.BNB);
+          const account = await db.getClientAccount('123', TYPE.WAGERR);
           assert.isNull(account);
         });
 
@@ -257,14 +257,14 @@ describe('Database', () => {
           const bnbAddress = '345';
 
           await dbHelper.insertBNBAccount('bnb', 'memo');
-          await dbHelper.insertClientAccount(uuid, bnbAddress, TYPE.LOKI, 'bnb', TYPE.BNB);
+          await dbHelper.insertClientAccount(uuid, bnbAddress, TYPE.WAGERR, 'bnb', TYPE.BNB);
 
-          const account = await db.getClientAccount(bnbAddress, TYPE.LOKI);
+          const account = await db.getClientAccount(bnbAddress, TYPE.WAGERR);
           assert.isNotNull(account);
           assert.deepEqual(account, {
             uuid,
             address: bnbAddress,
-            addressType: TYPE.LOKI,
+            addressType: TYPE.WAGERR,
             accountType: TYPE.BNB,
             account: { memo: 'memo' },
           });
@@ -274,33 +274,33 @@ describe('Database', () => {
 
     describe('#insertClientAccount', () => {
       it('should return null if an invalid account was passed', async () => {
-        const insertLokiSpy = sandbox.spy(db, 'insertLokiAccount');
+        const insertWagerrSpy = sandbox.spy(db, 'insertWagerrAccount');
         const insertBNBSpy = sandbox.spy(db, 'insertBNBAccount');
 
-        const result = await db.insertClientAccount('123', TYPE.LOKI, null);
+        const result = await db.insertClientAccount('123', TYPE.WAGERR, null);
         assert.isNull(result);
         assert(insertBNBSpy.called, 'insertBNBAccount was not called');
 
         const another = await db.insertClientAccount('123', TYPE.BNB, null);
         assert.isNull(another);
-        assert(insertLokiSpy.called, 'insertLokiAccount was not called');
+        assert(insertWagerrSpy.called, 'insertWagerrAccount was not called');
       });
 
-      it('should insert a LOKI account if address type is BNB', async () => {
-        const lokiAddress = 'loki-address';
-        await db.insertClientAccount('123', TYPE.BNB, { address: lokiAddress, address_index: 0 });
+      it('should insert a WAGERR account if address type is BNB', async () => {
+        const wagerrAddress = 'wagerr-address';
+        await db.insertClientAccount('123', TYPE.BNB, { address: wagerrAddress, address_index: 0 });
 
-        const accounts = await postgres.manyOrNone('select * from accounts_loki');
+        const accounts = await postgres.manyOrNone('select * from accounts_wagerr');
         assert.isNotNull(accounts);
         assert.lengthOf(accounts, 1);
 
-        assert.strictEqual(accounts[0].address, lokiAddress);
+        assert.strictEqual(accounts[0].address, wagerrAddress);
         assert.equal(accounts[0].address_index, 0);
       });
 
-      it('should insert a BNB account if address type is LOKI', async () => {
+      it('should insert a BNB account if address type is WAGERR', async () => {
         const memo = 'bnbMemo';
-        await db.insertClientAccount('123', TYPE.LOKI, { memo });
+        await db.insertClientAccount('123', TYPE.WAGERR, { memo });
 
         const accounts = await postgres.manyOrNone('select * from accounts_bnb');
         assert.isNotNull(accounts);
@@ -310,33 +310,33 @@ describe('Database', () => {
     });
   });
 
-  describe('Loki', () => {
-    describe('#insertLokiAccount', () => {
+  describe('Wagerr', () => {
+    describe('#insertWagerrAccount', () => {
       it('should return null if account is not set', async () => {
-        const account = await db.insertLokiAccount(null);
+        const account = await db.insertWagerrAccount(null);
         assert.isNull(account);
       });
 
-      it('should insert the loki account we specified and return it', async () => {
+      it('should insert the wagerr account we specified and return it', async () => {
         const address = 'abcd';
         const addressIndex = 0;
 
-        const account = await db.insertLokiAccount({ address, address_index: addressIndex });
+        const account = await db.insertWagerrAccount({ address, address_index: addressIndex });
         assert.isNotNull(account);
         assert.strictEqual(account.address, address);
         assert.strictEqual(account.address_index, addressIndex);
 
-        const { count } = await postgres.one('select count(*) from accounts_loki');
+        const { count } = await postgres.one('select count(*) from accounts_wagerr');
         assert.equal(count, 1);
       });
     });
 
-    describe('#getLokiAccount', () => {
+    describe('#getWagerrAccount', () => {
       it('should return null if it could not find and account', async () => {
-        const { count } = await postgres.one('select count(*) from accounts_loki');
+        const { count } = await postgres.one('select count(*) from accounts_wagerr');
         assert.equal(count, 0);
 
-        const account = await db.getLokiAccount('fake address');
+        const account = await db.getWagerrAccount('fake address');
         assert.isNull(account);
       });
 
@@ -344,9 +344,9 @@ describe('Database', () => {
         const uuid = '17b42f9e-97b1-11e9-bc42-526af7764f64';
         const address = 'abcdef';
         const index = 0;
-        await dbHelper.insertLokiAccount(uuid, address, index);
+        await dbHelper.insertWagerrAccount(uuid, address, index);
 
-        const account = await db.getLokiAccount(address);
+        const account = await db.getWagerrAccount(address);
         assert.isNotNull(account);
         assert.strictEqual(account.uuid, uuid);
         assert.strictEqual(account.address, address);
@@ -393,9 +393,9 @@ describe('Database', () => {
       it('should return all the swaps for the given client account', async () => {
         const clientUuid = 'clientUuid';
         await postgres.tx(t => t.batch([
-          dbHelper.insertSwap('1', SWAP_TYPE.LOKI_TO_BLOKI, 1, clientUuid),
-          dbHelper.insertSwap('2', SWAP_TYPE.BLOKI_TO_LOKI, 2, clientUuid),
-          dbHelper.insertSwap('3', SWAP_TYPE.LOKI_TO_BLOKI, 4, 'another uuid'),
+          dbHelper.insertSwap('1', SWAP_TYPE.WAGERR_TO_BWAGERR, 1, clientUuid),
+          dbHelper.insertSwap('2', SWAP_TYPE.BWAGERR_TO_WAGERR, 2, clientUuid),
+          dbHelper.insertSwap('3', SWAP_TYPE.WAGERR_TO_BWAGERR, 4, 'another uuid'),
         ]));
 
         const swaps = await db.getSwapsForClientAccount(clientUuid);
@@ -408,19 +408,19 @@ describe('Database', () => {
         const { count } = await postgres.one('select count(*) from swaps');
         assert.equal(count, 0);
 
-        const swaps = await db.getPendingSwaps(SWAP_TYPE.LOKI_TO_BLOKI);
+        const swaps = await db.getPendingSwaps(SWAP_TYPE.WAGERR_TO_BWAGERR);
         assert.isEmpty(swaps);
       });
 
       it('should return all the swaps that are pending', async () => {
         const clientUuid = '17b42f9e-97b1-11e9-bc42-526af7764f64';
         await postgres.tx(t => t.batch([
-          dbHelper.insertSwap('1', SWAP_TYPE.LOKI_TO_BLOKI, 1, clientUuid, 'pending swap'),
-          dbHelper.insertSwap('2', SWAP_TYPE.LOKI_TO_BLOKI, 1, clientUuid, 'completed swap', 'transaction', Date.now()),
-          dbHelper.insertSwap('3', SWAP_TYPE.BLOKI_TO_LOKI, 1, clientUuid, 'pending swap'),
+          dbHelper.insertSwap('1', SWAP_TYPE.WAGERR_TO_BWAGERR, 1, clientUuid, 'pending swap'),
+          dbHelper.insertSwap('2', SWAP_TYPE.WAGERR_TO_BWAGERR, 1, clientUuid, 'completed swap', 'transaction', Date.now()),
+          dbHelper.insertSwap('3', SWAP_TYPE.BWAGERR_TO_WAGERR, 1, clientUuid, 'pending swap'),
         ]));
 
-        const swaps = await db.getPendingSwaps(SWAP_TYPE.LOKI_TO_BLOKI);
+        const swaps = await db.getPendingSwaps(SWAP_TYPE.WAGERR_TO_BWAGERR);
         assert.lengthOf(swaps, 1);
       });
 
@@ -431,20 +431,20 @@ describe('Database', () => {
         const depositHash = '1234';
 
         await postgres.tx(t => t.batch([
-          dbHelper.insertClientAccount(clientUuid, address, TYPE.LOKI, accountUuid, TYPE.BNB),
-          dbHelper.insertSwap('1', SWAP_TYPE.LOKI_TO_BLOKI, 2, clientUuid, 'pending swap'),
-          dbHelper.insertSwap('2', SWAP_TYPE.LOKI_TO_BLOKI, 9, clientUuid, 'completed swap', 'transaction', Date.now()),
-          dbHelper.insertSwap('3', SWAP_TYPE.BLOKI_TO_LOKI, 10, clientUuid, depositHash),
+          dbHelper.insertClientAccount(clientUuid, address, TYPE.WAGERR, accountUuid, TYPE.BNB),
+          dbHelper.insertSwap('1', SWAP_TYPE.WAGERR_TO_BWAGERR, 2, clientUuid, 'pending swap'),
+          dbHelper.insertSwap('2', SWAP_TYPE.WAGERR_TO_BWAGERR, 9, clientUuid, 'completed swap', 'transaction', Date.now()),
+          dbHelper.insertSwap('3', SWAP_TYPE.BWAGERR_TO_WAGERR, 10, clientUuid, depositHash),
         ]));
 
-        const swaps = await db.getPendingSwaps(SWAP_TYPE.BLOKI_TO_LOKI);
+        const swaps = await db.getPendingSwaps(SWAP_TYPE.BWAGERR_TO_WAGERR);
         assert.lengthOf(swaps, 1);
 
         const swap = swaps[0];
-        assert.strictEqual(swap.type, SWAP_TYPE.BLOKI_TO_LOKI);
+        assert.strictEqual(swap.type, SWAP_TYPE.BWAGERR_TO_WAGERR);
         assert.equal(swap.amount, 10);
         assert.strictEqual(swap.deposit_transaction_hash, depositHash);
-        assert.strictEqual(swap.address_type, TYPE.LOKI);
+        assert.strictEqual(swap.address_type, TYPE.WAGERR);
         assert.strictEqual(swap.address, address);
         assert.strictEqual(swap.account_type, TYPE.BNB);
         assert.strictEqual(swap.account_uuid, accountUuid);
@@ -453,7 +453,7 @@ describe('Database', () => {
 
     describe('#insertSwap', () => {
       it('should return null if a null transaction was passed', async () => {
-        const swap = await db.insertSwap(null, { uuid: '1', addressType: TYPE.LOKI });
+        const swap = await db.insertSwap(null, { uuid: '1', addressType: TYPE.WAGERR });
         assert.isNull(swap);
       });
 
@@ -464,14 +464,14 @@ describe('Database', () => {
 
       it('should insert the swap correctly', async () => {
         const clientUuid = '17b42f9e-97b1-11e9-bc42-526af7764f64';
-        const swap = await db.insertSwap({ hash: '123', amount: 10, timestamp: 3 }, { uuid: clientUuid, addressType: TYPE.LOKI });
+        const swap = await db.insertSwap({ hash: '123', amount: 10, timestamp: 3 }, { uuid: clientUuid, addressType: TYPE.WAGERR });
         assert.isNotNull(swap);
 
         const dbSwap = await postgres.oneOrNone('select * from swaps where uuid = $1', [swap.uuid]);
         assert.isNotNull(dbSwap);
 
         assert.strictEqual(dbSwap.uuid, swap.uuid);
-        assert.strictEqual(dbSwap.type, SWAP_TYPE.BLOKI_TO_LOKI);
+        assert.strictEqual(dbSwap.type, SWAP_TYPE.BWAGERR_TO_WAGERR);
         assert.equal(dbSwap.amount, 10);
         assert.strictEqual(dbSwap.deposit_transaction_hash, '123');
         assert.strictEqual(dbSwap.client_account_uuid, clientUuid);
@@ -480,7 +480,7 @@ describe('Database', () => {
     });
 
     describe('#insertSwaps', () => {
-      const clientAccount = { uuid: '1', addressType: TYPE.LOKI, address: '123', accountAddress: '234' };
+      const clientAccount = { uuid: '1', addressType: TYPE.WAGERR, address: '123', accountAddress: '234' };
       const transactions = [1, 2, 3].map(t => ({ hash: String(t), amount: t }));
 
       it('should return an empty array if a null client account was passed', async () => {
@@ -518,7 +518,7 @@ describe('Database', () => {
         assert.lengthOf(swaps, 1);
 
         const swap = swaps[0];
-        assert.strictEqual(swap.type, SWAP_TYPE.BLOKI_TO_LOKI);
+        assert.strictEqual(swap.type, SWAP_TYPE.BWAGERR_TO_WAGERR);
         assert.equal(swap.amount, transaction.amount);
         assert.strictEqual(swap.deposit_transaction_hash, transaction.hash);
       });
@@ -528,7 +528,7 @@ describe('Database', () => {
       it('should update transaction hash and set swap to processed', async () => {
         const uuid = '17b42f9e-97b1-11e9-bc42-526af7764f64';
         const transferTxHash = 'transfer';
-        await dbHelper.insertSwap(uuid, SWAP_TYPE.LOKI_TO_BLOKI, 10, 'uuid', 'deposit');
+        await dbHelper.insertSwap(uuid, SWAP_TYPE.WAGERR_TO_BWAGERR, 10, 'uuid', 'deposit');
 
         const { count: processedCount } = await postgres.one('select count(*) from swaps where processed is not null');
         assert.equal(processedCount, 0);

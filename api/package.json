@@ -1,7 +1,7 @@
 {
-  "name": "loki-network-bridge-api",
+  "name": "wagerr-network-bridge-api",
   "version": "1.0.0",
-  "description": "Bridge API for converting Loki to B-Loki",
+  "description": "Bridge API for converting Wagerr to B-Wagerr",
   "main": "index.js",
   "private": true,
   "scripts": {
@@ -11,7 +11,7 @@
     "test": "cross-env NODE_ENV=test mocha -r esm --recursive --timeout 10000",
     "preinstall": "npm link ../bridge-core"
   },
-  "author": "Loki Network",
+  "author": "Wagerr Network",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.19.0",

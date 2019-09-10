@@ -1,4 +1,4 @@
-# Loki Bridge Core
+# Wagerr Bridge Core
 
 This is some core code which is shared between `api` and `processing`.
 

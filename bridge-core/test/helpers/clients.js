@@ -1,13 +1,13 @@
-import { PostgresClient, LokiClient, BinanceClient } from '../../clients';
+import { PostgresClient, WagerrClient, BinanceClient } from '../../clients';
 
-export const loki = new LokiClient({
+export const wagerr = new WagerrClient({
   hostname: 'localhost',
   port: 18083,
   username: '',
   password: '',
 },
 {
-  filename: 'lokibridge',
+  filename: 'wagerrbridge',
   password: '',
 });
 
@@ -20,7 +20,7 @@ export const bnb = new BinanceClient({
 export const postgres = PostgresClient({
   host: 'localhost',
   port: 5432,
-  database: 'lokibridge-test',
+  database: 'wagerrbridge-test',
   user: 'postgres',
   password: '',
 });

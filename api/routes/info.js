@@ -2,12 +2,12 @@
 import config from 'config';
 
 export function getInfo(req, res, next) {
-  const lokiFee = config.get('loki.withdrawalFee');
-  const lokiAmount = (parseFloat(lokiFee) * 1e9).toFixed(0);
+  const wagerrFee = config.get('wagerr.withdrawalFee');
+  const wagerrAmount = (parseFloat(wagerrFee) * 1e9).toFixed(0);
 
   const info = {
-    fees: { loki: lokiAmount },
-    minLokiConfirmations: config.get('loki.minConfirmations'),
+    fees: { wagerr: wagerrAmount },
+    minWagerrConfirmations: config.get('wagerr.minConfirmations'),
   };
 
   res.status(205);

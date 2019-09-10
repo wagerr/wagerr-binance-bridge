@@ -1,9 +1,9 @@
 export const TYPE = {
-  LOKI: 'loki',
-  BNB: 'bnb', // This is the wallet type for BLOKI
+  WAGERR: 'wagerr',
+  BNB: 'bnb', // This is the wallet type for BWAGERR
 };
 
 export const SWAP_TYPE = {
-  LOKI_TO_BLOKI: 'loki_to_bloki',
-  BLOKI_TO_LOKI: 'bloki_to_loki',
+  WAGERR_TO_BWAGERR: 'wagerr_to_bwagerr',
+  BWAGERR_TO_WAGERR: 'bwagerr_to_wagerr',
 };

@@ -1,11 +1,11 @@
 {
   "database": {
-    "database": "lokibridge-test"
+    "database": "wagerrbridge-test"
   },
   "binance": {
     "symbol": "TEST"
   },
-  "loki": {
+  "wagerr": {
     "minConfirmations": 6,
     "withdrawalFee": 1
   }

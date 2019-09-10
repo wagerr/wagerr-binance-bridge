@@ -3,7 +3,7 @@ import { assert } from 'chai';
 import sinon from 'sinon';
 import { SWAP_TYPE } from 'bridge-core';
 import { validation } from '../../utils';
-import { bnb, loki } from '../../core';
+import { bnb, wagerr } from '../../core';
 
 const sandbox = sinon.createSandbox();
 
@@ -14,7 +14,7 @@ describe('Validation', () => {
 
   describe('#validateSwap', async () => {
     const stubValidateAddressReturn = value => {
-      sandbox.stub(loki, 'validateAddress').resolves(value);
+      sandbox.stub(wagerr, 'validateAddress').resolves(value);
       sandbox.stub(bnb, 'validateAddress').returns(value);
     };
 
@@ -24,7 +24,7 @@ describe('Validation', () => {
     });
 
     it('should return an error if address is not present', async () => {
-      const error = await validation.validateSwap({ type: SWAP_TYPE.LOKI_TO_BLOKI });
+      const error = await validation.validateSwap({ type: SWAP_TYPE.WAGERR_TO_BWAGERR });
       assert.strictEqual(error, 'address is required');
     });
 
@@ -33,28 +33,28 @@ describe('Validation', () => {
       assert.strictEqual(error, 'type is invalid');
     });
 
-    it('should return an error if the loki address was invalid', async () => {
+    it('should return an error if the wagerr address was invalid', async () => {
       stubValidateAddressReturn(false);
 
-      const error = await validation.validateSwap({ address: 'an address', type: SWAP_TYPE.BLOKI_TO_LOKI });
-      assert(loki.validateAddress.calledOnce, 'Loki validate was not called');
-      assert.strictEqual(error, 'address must be a LOKI address');
+      const error = await validation.validateSwap({ address: 'an address', type: SWAP_TYPE.BWAGERR_TO_WAGERR });
+      assert(wagerr.validateAddress.calledOnce, 'Wagerr validate was not called');
+      assert.strictEqual(error, 'address must be a WAGERR address');
     });
 
     it('should return an error if the bnb address was invalid', async () => {
       stubValidateAddressReturn(false);
-      const error = await validation.validateSwap({ address: 'an address', type: SWAP_TYPE.LOKI_TO_BLOKI });
+      const error = await validation.validateSwap({ address: 'an address', type: SWAP_TYPE.WAGERR_TO_BWAGERR });
       assert(bnb.validateAddress.calledOnce, 'BNB validate was not called');
       assert.strictEqual(error, 'address must be a BNB address');
     });
 
     it('should return null if no errors occurred', async () => {
       stubValidateAddressReturn(true);
-      const lokiError = await validation.validateSwap({ address: '1', type: SWAP_TYPE.BLOKI_TO_LOKI });
-      assert.isNull(lokiError);
-      assert(loki.validateAddress.calledOnce, 'Loki validate was not called');
+      const wagerrError = await validation.validateSwap({ address: '1', type: SWAP_TYPE.BWAGERR_TO_WAGERR });
+      assert.isNull(wagerrError);
+      assert(wagerr.validateAddress.calledOnce, 'Wagerr validate was not called');
 
-      const bnbError = await validation.validateSwap({ address: '1', type: SWAP_TYPE.LOKI_TO_BLOKI });
+      const bnbError = await validation.validateSwap({ address: '1', type: SWAP_TYPE.WAGERR_TO_BWAGERR });
       assert.isNull(bnbError);
       assert(bnb.validateAddress.calledOnce, 'BNB validate was not called');
     });

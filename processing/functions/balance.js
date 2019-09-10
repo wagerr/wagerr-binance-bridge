@@ -7,16 +7,16 @@ import log from '../utils/log';
 
 const module = {
   async checkAllBalances() {
-    const lokiBalance = await module.getBalances(SWAP_TYPE.LOKI_TO_BLOKI);
-    module.printBalance(SWAP_TYPE.LOKI_TO_BLOKI, lokiBalance);
+    const wagerrBalance = await module.getBalances(SWAP_TYPE.WAGERR_TO_BWAGERR);
+    module.printBalance(SWAP_TYPE.WAGERR_TO_BWAGERR, wagerrBalance);
 
-    const bnbBalance = await module.getBalances(SWAP_TYPE.BLOKI_TO_LOKI);
-    module.printBalance(SWAP_TYPE.BLOKI_TO_LOKI, bnbBalance);
+    const bnbBalance = await module.getBalances(SWAP_TYPE.BWAGERR_TO_WAGERR);
+    module.printBalance(SWAP_TYPE.BWAGERR_TO_WAGERR, bnbBalance);
   },
 
   printBalance(swapType, balance, showWarning = true) {
-    const receiveCurrency = swapType === SWAP_TYPE.LOKI_TO_BLOKI ? 'LOKI' : 'B-LOKI';
-    const swapCurrency = swapType === SWAP_TYPE.LOKI_TO_BLOKI ? 'B-LOKI' : 'LOKI';
+    const receiveCurrency = swapType === SWAP_TYPE.WAGERR_TO_BWAGERR ? 'WAGERR' : 'B-WAGERR';
+    const swapCurrency = swapType === SWAP_TYPE.WAGERR_TO_BWAGERR ? 'B-WAGERR' : 'WAGERR';
     log.header(chalk.blue(`Balance of ${swapType}`));
     log.info(chalk`{green Transaction balance:} {bold ${balance.transaction / 1e9}} {yellow ${receiveCurrency}}`);
     log.info(chalk`{green Swap balance:} {bold ${balance.swap / 1e9}} {yellow ${swapCurrency}}`);
@@ -33,7 +33,7 @@ const module = {
     const now = Date.now();
     const twoDaysAgo = now - (2 * 24 * 60 * 60 * 1000);
 
-    const accountType = swapType === SWAP_TYPE.LOKI_TO_BLOKI ? TYPE.LOKI : TYPE.BNB;
+    const accountType = swapType === SWAP_TYPE.WAGERR_TO_BWAGERR ? TYPE.WAGERR : TYPE.BNB;
     const transactionBalance = await module.getBalanceFromIncomingTransactions(accountType, twoDaysAgo, now);
     const swapBalance = await module.getSwapBalance(swapType, twoDaysAgo, now);
     return {
@@ -73,14 +73,14 @@ const module = {
 
     let filtered = [];
 
-    if (accountType === TYPE.LOKI) {
+    if (accountType === TYPE.WAGERR) {
     // Get all incoming transactions from the client accounts
-      const promises = clientAccounts.map(async c => transactionHelper.getIncomingLokiTransactions(c.account.addressIndex));
-      const lokiTransactions = await Promise.all(promises).then(array => array.flat());
+      const promises = clientAccounts.map(async c => transactionHelper.getIncomingWagerrTransactions(c.account.addressIndex));
+      const wagerrTransactions = await Promise.all(promises).then(array => array.flat());
 
       // generate a list of all processed swaps
-      const swaps = await db.getAllSwaps(SWAP_TYPE.LOKI_TO_BLOKI);
-      // exclude any tx where we've received loki
+      const swaps = await db.getAllSwaps(SWAP_TYPE.WAGERR_TO_BWAGERR);
+      // exclude any tx where we've received wagerr
       // we want to include all those (and skip the confirmation check)
       const completedSwaps = swaps.filter(swap => {
         //console.log('swap, is complete?', swap.amount, swap.created);
@@ -94,18 +94,18 @@ const module = {
 
       // Filter out all transactions that don't fit our date ranges
 
-      filtered = lokiTransactions.filter(tx => {
+      filtered = wagerrTransactions.filter(tx => {
         // timestamps are in seconds so we need to convert to milliseconds
         const timestamp = tx.timestamp * 1000;
         // console.log('this tx', tx);
 
-        // loki.minConfirmations can change, we need to record it in the database
+        // wagerr.minConfirmations can change, we need to record it in the database
         // or have a flag if it's confirmed or not
         // actually the processed flag override should meet this criteria
-        console.log('need', config.get('loki.minConfirmations'), 'confirmations, have', tx.confirmations);
+        console.log('need', config.get('wagerr.minConfirmations'), 'confirmations, have', tx.confirmations);
 
         // we won't have a swap record...
-        if (tx.confirmations < config.get('loki.minConfirmations')) {
+        if (tx.confirmations < config.get('wagerr.minConfirmations')) {
           // confirm that this isn't a processed transaction
           // console.log('tx info', tx.amount);
           const results = completedSwaps.filter(swap => {
@@ -177,7 +177,7 @@ const module = {
 
     values.forEach(({ hash, amount, memo, timestamp }) => {
       log.header(chalk.blue(hash));
-      log.info(chalk`{green amount:} ${amount} BLOKI`);
+      log.info(chalk`{green amount:} ${amount} BWAGERR`);
       log.info(chalk`{green memo:} ${memo}`);
       log.info(chalk`{green timestamp:} ${timestamp}`);
     });

@@ -1,6 +1,6 @@
 /* eslint-disable no-extend-native */
 import { TYPE, SWAP_TYPE } from 'bridge-core';
-import { loki, transactionHelper, db } from '../core';
+import { wagerr, transactionHelper, db } from '../core';
 import { crypto, validation } from '../utils';
 
 // - Public
@@ -10,7 +10,7 @@ import { crypto, validation } from '../utils';
  * Request Data:
  *  - type: The type of swap (SWAP_TYPE).
  *  - address: An address. The type of address is determined from the `type` passed.
- *  E.g If `type = LOKI_TO_BLOKI` then the `address` is expected to be a loki address.
+ *  E.g If `type = WAGERR_TO_BWAGERR` then the `address` is expected to be a wagerr address.
  */
 export function swapToken(req, res, next) {
   crypto.decryptAPIPayload(req, res, next, async data => {
@@ -24,10 +24,10 @@ export function swapToken(req, res, next) {
     const { type, address } = data;
 
     // We assume the address type is that of the currency we are swapping to.
-    // So if the swap is LOKI_TO_BLOKI then we want the user to give the BNB address
-    // We then generate a LOKI address that they will deposit to.
+    // So if the swap is WAGERR_TO_BWAGERR then we want the user to give the BNB address
+    // We then generate a WAGERR address that they will deposit to.
     // After the deposit we pay them out to the BNB address they passed.
-    const addressType = type === SWAP_TYPE.LOKI_TO_BLOKI ? TYPE.BNB : TYPE.LOKI;
+    const addressType = type === SWAP_TYPE.WAGERR_TO_BWAGERR ? TYPE.BNB : TYPE.WAGERR;
 
     try {
       const account = await db.getClientAccount(address, addressType);
@@ -38,14 +38,14 @@ export function swapToken(req, res, next) {
       }
 
       // Account type is the that of the currency we are swapping from
-      const accountType = type === SWAP_TYPE.LOKI_TO_BLOKI ? TYPE.LOKI : TYPE.BNB;
+      const accountType = type === SWAP_TYPE.WAGERR_TO_BWAGERR ? TYPE.WAGERR : TYPE.BNB;
 
       let newAccount = null;
       if (accountType === TYPE.BNB) {
         // Generate a random memo
         newAccount = { memo: crypto.generateRandomString(64) };
-      } else if (accountType === TYPE.LOKI) {
-        newAccount = await loki.createAccount();
+      } else if (accountType === TYPE.WAGERR) {
+        newAccount = await wagerr.createAccount();
       }
 
       if (!newAccount) {
@@ -189,11 +189,11 @@ export async function getSwaps(req, res, next) {
 }
 
 /**
- * Get all unconfirmed loki transactions
+ * Get all unconfirmed wagerr transactions
  * Request Data:
  *  - uuid: The uuid that was returned in `swapToken` (client account uuid)
  */
-export async function getUncomfirmedLokiTransactions(req, res, next) {
+export async function getUncomfirmedWagerrTransactions(req, res, next) {
   const data = req.query;
 
   const result = validation.validateUuidPresent(data);
@@ -207,8 +207,8 @@ export async function getUncomfirmedLokiTransactions(req, res, next) {
 
   try {
     const clientAccount = await db.getClientAccountForUuid(uuid);
-    const transactions = await transactionHelper.getIncomingLokiTransactions(clientAccount.account.addressIndex, { pool: true });
-    const unconfirmed = transactions.filter(tx => tx.confirmations < transactionHelper.minLokiConfirmations)
+    const transactions = await transactionHelper.getIncomingWagerrTransactions(clientAccount.account.addressIndex, { pool: true });
+    const unconfirmed = transactions.filter(tx => tx.confirmations < transactionHelper.minWagerrConfirmations)
       .map(({ hash, amount, timestamp }) => ({ hash, amount, created: timestamp }));
 
     res.status(205);
@@ -226,7 +226,7 @@ export async function getUncomfirmedLokiTransactions(req, res, next) {
 // - Util
 
 function formatClientAccount({ uuid, accountType: type, account }) {
-  const depositAddress = type === TYPE.LOKI ? account.address : transactionHelper.ourBNBAddress;
+  const depositAddress = type === TYPE.WAGERR ? account.address : transactionHelper.ourBNBAddress;
   const result = {
     uuid,
     type,

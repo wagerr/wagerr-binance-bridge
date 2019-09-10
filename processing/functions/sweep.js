@@ -9,32 +9,32 @@ const module = {
    * Sweep any pending swaps
    */
   async sweepAllPendingSwaps() {
-    await module.sweepPendingLokiToBloki();
-    await module.sweepPendingBlokiToLoki();
+    await module.sweepPendingWagerrToBwagerr();
+    await module.sweepPendingBwagerrToWagerr();
   },
 
   /**
-  * Sweep any pending loki_to_bloki swaps
+  * Sweep any pending wagerr_to_bwagerr swaps
   */
-  async sweepPendingLokiToBloki() {
-    log.header(chalk.blue(`Sweeping ${SWAP_TYPE.LOKI_TO_BLOKI}`));
+  async sweepPendingWagerrToBwagerr() {
+    log.header(chalk.blue(`Sweeping ${SWAP_TYPE.WAGERR_TO_BWAGERR}`));
 
     // Get all the client accounts
-    const clientAccounts = await db.getClientAccounts(TYPE.LOKI);
+    const clientAccounts = await db.getClientAccounts(TYPE.WAGERR);
 
     // Get all incoming transactions from the client accounts
     const promises = clientAccounts.map(async c => {
       const { address } = c.account;
-      const transactions = await transactionHelper.getIncomingTransactions(c.account, TYPE.LOKI);
+      const transactions = await transactionHelper.getIncomingTransactions(c.account, TYPE.WAGERR);
       return transactions.map(t => ({ ...t, address }));
     });
-    const lokiTransactions = await Promise.all(promises).then(array => array.flat());
+    const wagerrTransactions = await Promise.all(promises).then(array => array.flat());
 
     // Get all the deposit hases from the db
-    const hashes = await db.getAllSwapDepositHashes(SWAP_TYPE.LOKI_TO_BLOKI);
+    const hashes = await db.getAllSwapDepositHashes(SWAP_TYPE.WAGERR_TO_BWAGERR);
 
     // Get all the new transactions
-    const newTransactions = lokiTransactions.filter(t => !hashes.includes(t.hash));
+    const newTransactions = wagerrTransactions.filter(t => !hashes.includes(t.hash));
     if (newTransactions.length === 0) {
       log.info(chalk.yellow('No new transactions'));
       return;
@@ -54,10 +54,10 @@ const module = {
   },
 
   /**
-  * Sweep any pending bloki_to_loki swaps
+  * Sweep any pending bwagerr_to_wagerr swaps
   */
-  async sweepPendingBlokiToLoki() {
-    log.header(chalk.blue(`Sweeping ${SWAP_TYPE.BLOKI_TO_LOKI}`));
+  async sweepPendingBwagerrToWagerr() {
+    log.header(chalk.blue(`Sweeping ${SWAP_TYPE.BWAGERR_TO_WAGERR}`));
     const ourAddress = transactionHelper.ourBNBAddress;
 
     // Get all our incoming transactions which contain a memo
@@ -65,7 +65,7 @@ const module = {
     const memoTransactions = transactions.filter(t => t.memo && t.memo.length > 0);
 
     // Get all the deposit hases from the db
-    const hashes = await db.getAllSwapDepositHashes(SWAP_TYPE.BLOKI_TO_LOKI);
+    const hashes = await db.getAllSwapDepositHashes(SWAP_TYPE.BWAGERR_TO_WAGERR);
 
     // Get all the new transactions
     const newTransactions = memoTransactions.filter(t => !hashes.includes(t.hash));

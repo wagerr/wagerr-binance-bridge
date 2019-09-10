@@ -3,7 +3,7 @@ import { assert } from 'chai';
 import sinon from 'sinon';
 import config from 'config';
 import { SWAP_TYPE, TYPE } from 'bridge-core';
-import { bnb, loki, postgres, db } from '../../core';
+import { bnb, wagerr, postgres, db } from '../../core';
 import functions from '../../functions/swaps';
 import { dbHelper } from '../helpers';
 import log, { stubConsole } from '../../utils/log';
@@ -77,21 +77,21 @@ describe('Processing Swaps', () => {
     const transactions = [{ address: '1', amount: 7 * 1e9 }];
 
     let bnbStub;
-    let lokiStub;
+    let wagerrStub;
 
     beforeEach(() => {
       bnbStub = sandbox.stub(bnb, 'multiSend');
-      lokiStub = sandbox.stub(loki, 'multiSend');
+      wagerrStub = sandbox.stub(wagerr, 'multiSend');
     });
 
-    it('should send to BNB if swap type is LOKI_TO_BLOKI', async () => {
-      await functions.send(SWAP_TYPE.LOKI_TO_BLOKI, transactions);
+    it('should send to BNB if swap type is WAGERR_TO_BWAGERR', async () => {
+      await functions.send(SWAP_TYPE.WAGERR_TO_BWAGERR, transactions);
       assert(bnbStub.called, 'bnb.multiSend was not called');
     });
 
-    it('should send to LOKI if swap type is BLOKI_TO_LOKI', async () => {
-      await functions.send(SWAP_TYPE.BLOKI_TO_LOKI, transactions);
-      assert(lokiStub.called, 'loki.multiSend was not called');
+    it('should send to WAGERR if swap type is BWAGERR_TO_WAGERR', async () => {
+      await functions.send(SWAP_TYPE.BWAGERR_TO_WAGERR, transactions);
+      assert(wagerrStub.called, 'wagerr.multiSend was not called');
     });
 
     it('should throw an error if swap type was invalid', async () => {
@@ -104,7 +104,7 @@ describe('Processing Swaps', () => {
     });
 
     it('should convert the transactions to correct outputs for BNB', async () => {
-      await functions.send(SWAP_TYPE.LOKI_TO_BLOKI, transactions);
+      await functions.send(SWAP_TYPE.WAGERR_TO_BWAGERR, transactions);
 
       const { args } = bnbStub.getCalls()[0];
       assert.lengthOf(args, 3);
@@ -120,12 +120,12 @@ describe('Processing Swaps', () => {
       }]);
     });
 
-    it('should deduct the widthdrawal fee from each transaction for Loki', async () => {
-      const fee = config.get('loki.withdrawalFee');
+    it('should deduct the widthdrawal fee from each transaction for Wagerr', async () => {
+      const fee = config.get('wagerr.withdrawalFee');
 
-      await functions.send(SWAP_TYPE.BLOKI_TO_LOKI, transactions);
+      await functions.send(SWAP_TYPE.BWAGERR_TO_WAGERR, transactions);
 
-      const { args } = lokiStub.getCalls()[0];
+      const { args } = wagerrStub.getCalls()[0];
       assert.lengthOf(args, 1);
 
       const outputs = args[0];
@@ -140,13 +140,13 @@ describe('Processing Swaps', () => {
   describe('#processSwaps', () => {
     beforeEach(async () => {
       sandbox.stub(bnb, 'multiSend').resolves(['bnbTxHash1', 'bnbTxHash2']);
-      sandbox.stub(loki, 'multiSend').resolves(['lokiTxHash1', 'lokiTxHash2']);
+      sandbox.stub(wagerr, 'multiSend').resolves(['wagerrTxHash1', 'wagerrTxHash2']);
       sandbox.stub(db, 'updateSwapsTransferTransactionHash').resolves();
     });
 
     it('should throw an error if swaps were empty', async () => {
       try {
-        await functions.processSwaps([], SWAP_TYPE.LOKI_TO_BLOKI);
+        await functions.processSwaps([], SWAP_TYPE.WAGERR_TO_BWAGERR);
         assert.fail();
       } catch (e) {
         assert.instanceOf(e, functions.Errors.NoSwapsToProcess);
@@ -156,7 +156,7 @@ describe('Processing Swaps', () => {
     it('should return the correct data if it succeeds', async () => {
       const fee = 20;
       sandbox.stub(functions, 'fees').value({
-        [TYPE.LOKI]: fee,
+        [TYPE.WAGERR]: fee,
         [TYPE.BNB]: 0,
       });
 
@@ -175,8 +175,8 @@ describe('Processing Swaps', () => {
       // Fee should only be charged once per address
       const expectedFees = fee * Object.keys(values).length;
 
-      // Make sure we get the LOKI fees
-      const data = await functions.processSwaps(swaps, SWAP_TYPE.BLOKI_TO_LOKI);
+      // Make sure we get the WAGERR fees
+      const data = await functions.processSwaps(swaps, SWAP_TYPE.BWAGERR_TO_WAGERR);
       assert.isNotNull(data);
       assert.deepEqual(data, {
         swaps,
@@ -189,16 +189,16 @@ describe('Processing Swaps', () => {
   describe('#processAutoSwaps', () => {
     const usdPrice = 0.5;
     beforeEach(async () => {
-      sandbox.stub(functions, 'getCurrentLokiPriceInUSD').resolves(usdPrice);
+      sandbox.stub(functions, 'getCurrentWagerrPriceInUSD').resolves(usdPrice);
       sandbox.stub(functions, 'processSwaps').callsFake(processSwapFake);
     });
 
     it('should throw an error if usd price is null', async () => {
       sandbox.restore();
-      sandbox.stub(functions, 'getCurrentLokiPriceInUSD').resolves(null);
+      sandbox.stub(functions, 'getCurrentWagerrPriceInUSD').resolves(null);
 
       try {
-        await functions.processAutoSwaps(10, 100, SWAP_TYPE.LOKI_TO_BLOKI);
+        await functions.processAutoSwaps(10, 100, SWAP_TYPE.WAGERR_TO_BWAGERR);
         assert.fail();
       } catch (e) {
         assert.instanceOf(e, functions.Errors.PriceFetchFailed);
@@ -207,10 +207,10 @@ describe('Processing Swaps', () => {
 
     it('should throw an error if usd price was less than 0', async () => {
       sandbox.restore();
-      sandbox.stub(functions, 'getCurrentLokiPriceInUSD').resolves(-1);
+      sandbox.stub(functions, 'getCurrentWagerrPriceInUSD').resolves(-1);
 
       try {
-        await functions.processAutoSwaps(10, 100, SWAP_TYPE.BLOKI_TO_LOKI);
+        await functions.processAutoSwaps(10, 100, SWAP_TYPE.BWAGERR_TO_WAGERR);
         assert.fail();
       } catch (e) {
         assert.instanceOf(e, functions.Errors.PriceFetchFailed);
@@ -221,7 +221,7 @@ describe('Processing Swaps', () => {
       sandbox.stub(db, 'getPendingSwaps').resolves([]);
 
       try {
-        await functions.processAutoSwaps(10, 100, SWAP_TYPE.BLOKI_TO_LOKI);
+        await functions.processAutoSwaps(10, 100, SWAP_TYPE.BWAGERR_TO_WAGERR);
         assert.fail();
       } catch (e) {
         assert.instanceOf(e, functions.Errors.NoSwapsToProcess);
@@ -234,7 +234,7 @@ describe('Processing Swaps', () => {
       const pairs = [[100, 100], [101, 100]];
       for (const [amount, limit] of pairs) {
         try {
-          await functions.processAutoSwaps(amount, limit, SWAP_TYPE.BLOKI_TO_LOKI);
+          await functions.processAutoSwaps(amount, limit, SWAP_TYPE.BWAGERR_TO_WAGERR);
           assert.fail();
         } catch (e) {
           assert.instanceOf(e, functions.Errors.DailyLimitHit);
@@ -246,7 +246,7 @@ describe('Processing Swaps', () => {
       sandbox.stub(db, 'getPendingSwaps').resolves([{ uuid: 1, amount: 100, address: 'a' }]);
 
       try {
-        await functions.processAutoSwaps(10, 100, SWAP_TYPE.BLOKI_TO_LOKI);
+        await functions.processAutoSwaps(10, 100, SWAP_TYPE.BWAGERR_TO_WAGERR);
       } catch (e) {
         console.log(e);
         assert.fail();
@@ -257,7 +257,7 @@ describe('Processing Swaps', () => {
       const swaps = ['a', 'b', 'c'].map((a, i) => ({ uuid: i, amount: (i + 1) * 1e9, address: a }));
       sandbox.stub(db, 'getPendingSwaps').resolves(swaps);
 
-      const data = await functions.processAutoSwaps(0, 99 * 1e9, SWAP_TYPE.LOKI_TO_BLOKI);
+      const data = await functions.processAutoSwaps(0, 99 * 1e9, SWAP_TYPE.WAGERR_TO_BWAGERR);
       assert.deepEqual(data.swaps, swaps);
     });
 
@@ -270,7 +270,7 @@ describe('Processing Swaps', () => {
       const max = amounts[0] + amounts[1];
       const maxUSD = (max / 1e9) * usdPrice;
 
-      const data = await functions.processAutoSwaps(0, maxUSD, SWAP_TYPE.LOKI_TO_BLOKI);
+      const data = await functions.processAutoSwaps(0, maxUSD, SWAP_TYPE.WAGERR_TO_BWAGERR);
       assert.deepEqual(data.swaps, swaps.slice(0, 2));
     });
 
@@ -283,7 +283,7 @@ describe('Processing Swaps', () => {
       const max = amounts[0] + (0.1 * 1e9);
       const maxUSD = (max / 1e9) * usdPrice;
 
-      const data = await functions.processAutoSwaps(0, maxUSD, SWAP_TYPE.LOKI_TO_BLOKI);
+      const data = await functions.processAutoSwaps(0, maxUSD, SWAP_TYPE.WAGERR_TO_BWAGERR);
       assert.deepEqual(data.swaps, swaps.slice(0, 2));
     });
 
@@ -292,7 +292,7 @@ describe('Processing Swaps', () => {
       const swaps = ['a', 'a', 'a'].map((a, i) => ({ uuid: i, amount: amounts[i], address: a }));
       sandbox.stub(db, 'getPendingSwaps').resolves(swaps);
 
-      const data = await functions.processAutoSwaps(0, 99 * 1e9, SWAP_TYPE.LOKI_TO_BLOKI);
+      const data = await functions.processAutoSwaps(0, 99 * 1e9, SWAP_TYPE.WAGERR_TO_BWAGERR);
       assert.deepEqual(data.swaps, swaps);
     });
 
@@ -301,11 +301,11 @@ describe('Processing Swaps', () => {
       const swaps = ['a', 'b', 'c'].map((a, i) => ({ uuid: i, amount: amounts[i], address: a }));
       sandbox.stub(db, 'getPendingSwaps').resolves(swaps);
       sandbox.stub(functions, 'fees').value({
-        [TYPE.LOKI]: 0,
+        [TYPE.WAGERR]: 0,
         [TYPE.BNB]: 0,
       });
 
-      const data = await functions.processAutoSwaps(0, 99 * 1e9, SWAP_TYPE.LOKI_TO_BLOKI);
+      const data = await functions.processAutoSwaps(0, 99 * 1e9, SWAP_TYPE.WAGERR_TO_BWAGERR);
 
       const sum = (a, b) => a + b;
       const total = amounts.reduce(sum, 0);
@@ -325,15 +325,15 @@ describe('Processing Swaps', () => {
   describe('#processAllSwapsOfType', () => {
     beforeEach(async () => {
       // Clear out any data in the db
-      await postgres.none('TRUNCATE client_accounts, accounts_loki, accounts_bnb, swaps CASCADE;');
+      await postgres.none('TRUNCATE client_accounts, accounts_wagerr, accounts_bnb, swaps CASCADE;');
 
       sandbox.stub(bnb, 'multiSend').resolves(['bnbTxHash1', 'bnbTxHash2']);
-      sandbox.stub(loki, 'multiSend').resolves(['lokiTxHash1', 'lokiTxHash2']);
+      sandbox.stub(wagerr, 'multiSend').resolves(['wagerrTxHash1', 'wagerrTxHash2']);
     });
 
     const processAllSwapsOfType = async swapType => {
-      const addressType = swapType === SWAP_TYPE.LOKI_TO_BLOKI ? TYPE.BNB : TYPE.LOKI;
-      const accountType = addressType === TYPE.BNB ? TYPE.LOKI : TYPE.BNB;
+      const addressType = swapType === SWAP_TYPE.WAGERR_TO_BWAGERR ? TYPE.BNB : TYPE.WAGERR;
+      const accountType = addressType === TYPE.BNB ? TYPE.WAGERR : TYPE.BNB;
       const clientAccountUuid = 'cbfa4d0f-cecb-4c46-88b8-719bbca6395a';
       const swapUuid = 'a2a67748-ae5d-415c-81d6-803d28dc29fb';
 
@@ -347,19 +347,19 @@ describe('Processing Swaps', () => {
       return postgres.oneOrNone('select transfer_transaction_hash from swaps where uuid = $1', [swapUuid]);
     };
 
-    context('LOKI_TO_BLOKI', () => {
+    context('WAGERR_TO_BWAGERR', () => {
       it('should update the transfer transactions hash on success', async () => {
-        const swap = await processAllSwapsOfType(SWAP_TYPE.LOKI_TO_BLOKI);
+        const swap = await processAllSwapsOfType(SWAP_TYPE.WAGERR_TO_BWAGERR);
         assert.isNotNull(swap);
         assert.strictEqual(swap.transfer_transaction_hash, 'bnbTxHash1,bnbTxHash2');
       });
     });
 
-    context('BLOKI_TO_LOKI', () => {
+    context('BWAGERR_TO_WAGERR', () => {
       it('should update the transfer transactions hash on success', async () => {
-        const swap = await processAllSwapsOfType(SWAP_TYPE.BLOKI_TO_LOKI);
+        const swap = await processAllSwapsOfType(SWAP_TYPE.BWAGERR_TO_WAGERR);
         assert.isNotNull(swap);
-        assert.strictEqual(swap.transfer_transaction_hash, 'lokiTxHash1,lokiTxHash2');
+        assert.strictEqual(swap.transfer_transaction_hash, 'wagerrTxHash1,wagerrTxHash2');
       });
     });
   });

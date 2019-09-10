@@ -36,8 +36,8 @@ export default class Database {
       accountType,
     };
 
-    if (accountType === TYPE.LOKI) {
-      const accountQuery = 'select address, address_index from accounts_loki where uuid = $1;';
+    if (accountType === TYPE.WAGERR) {
+      const accountQuery = 'select address, address_index from accounts_wagerr where uuid = $1;';
       const account = await this.postgres.oneOrNone(accountQuery, [accountUuid]);
       if (!account) return null;
 
@@ -64,7 +64,7 @@ export default class Database {
   /**
   * Get all client accounts with the given `accountType`
   *
-  * @param {'loki'|'bnb'} accountType The account type.
+  * @param {'wagerr'|'bnb'} accountType The account type.
   * @returns {Promise<[{ uuid, address, addressType, accountType, account }]>} An array of client accounts.
   */
   async getClientAccounts(accountType) {
@@ -81,7 +81,7 @@ export default class Database {
   * Get the client account associated with the given `address`.
   *
   * @param {string} address An address.
-  * @param {'loki'|'bnb'} addressType Which platform the address belongs to.
+  * @param {'wagerr'|'bnb'} addressType Which platform the address belongs to.
   * @return The client account or `null` if we failed to get the client account.
   */
   async getClientAccount(address, addressType) {
@@ -114,17 +114,17 @@ export default class Database {
   * Insert a client account with the given address and account.
   *
   * @param {string} address The address.
-  * @param {'loki'|'bnb'} addressType Which platform the address belongs to.
+  * @param {'wagerr'|'bnb'} addressType Which platform the address belongs to.
   * @param {*} account The account to insert.
   * @returns The inserted client account or `null` if we failed.
   */
   async insertClientAccount(address, addressType, account) {
-    // We assume that if addressType is loki then accountType is bnb and viceversa
-    const accountType = addressType === TYPE.LOKI ? TYPE.BNB : TYPE.LOKI;
+    // We assume that if addressType is wagerr then accountType is bnb and viceversa
+    const accountType = addressType === TYPE.WAGERR ? TYPE.BNB : TYPE.WAGERR;
 
     let dbAccount = null;
-    if (accountType === TYPE.LOKI) {
-      dbAccount = await this.insertLokiAccount(account);
+    if (accountType === TYPE.WAGERR) {
+      dbAccount = await this.insertWagerrAccount(account);
     } else if (accountType === TYPE.BNB) {
       dbAccount = await this.insertBNBAccount(account);
     }
@@ -140,16 +140,16 @@ export default class Database {
   }
 
   /**
-  * Insert a loki account.
+  * Insert a wagerr account.
   *
-  * @param {{ address: string, address_index: int }} account A loki account.
-  * @returns {Promise<{ uuid, address, address_index }>} The inserted loki account or `null` if we failed.
+  * @param {{ address: string, address_index: int }} account A wagerr account.
+  * @returns {Promise<{ uuid, address, address_index }>} The inserted wagerr account or `null` if we failed.
   */
-  async insertLokiAccount(account) {
+  async insertWagerrAccount(account) {
     if (!account) return null;
 
     // eslint-disable-next-line max-len
-    const query = 'insert into accounts_loki(uuid, address, address_index, created) values (md5(random()::text || clock_timestamp()::text)::uuid, $1, $2, now()) returning uuid, address, address_index;';
+    const query = 'insert into accounts_wagerr(uuid, address, address_index, created) values (md5(random()::text || clock_timestamp()::text)::uuid, $1, $2, now()) returning uuid, address, address_index;';
     return this.postgres.oneOrNone(query, [account.address, account.address_index]);
   }
 
@@ -168,24 +168,24 @@ export default class Database {
   }
 
   /**
-  * Get the loki account associated with the given loki `address`
+  * Get the wagerr account associated with the given wagerr `address`
   *
-  * @param {string} address The loki address.
-  * @returns {Promise<{ uuid, address, address_index }>} The loki account or `null` if there wasn't one.
+  * @param {string} address The wagerr address.
+  * @returns {Promise<{ uuid, address, address_index }>} The wagerr account or `null` if there wasn't one.
   */
-  async getLokiAccount(address) {
-    const query = 'select * from accounts_loki where address = $1;';
+  async getWagerrAccount(address) {
+    const query = 'select * from accounts_wagerr where address = $1;';
     return this.postgres.oneOrNone(query, [address]);
   }
 
   /**
   * Get the account indicies associated with the given `addresses`.
   *
-  * @param {[string]} addresses An array of loki sub-addresses.
+  * @param {[string]} addresses An array of wagerr sub-addresses.
   * @returns {Promise<[number]>} An array of address indicies.
   */
-  async getLokiAddressIndicies(addresses) {
-    const query = 'select address_index from accounts_loki where address in ($1:csv);';
+  async getWagerrAddressIndicies(addresses) {
+    const query = 'select address_index from accounts_wagerr where address in ($1:csv);';
     return this.postgres.manyOrNone(query, [addresses]);
   }
 
@@ -266,9 +266,9 @@ export default class Database {
     // If you want to extend to more than 2 currencies then you need to do this differently.
 
     // eslint-disable-next-line max-len
-    // If the client address is LOKI then it must mean that we generated a BNB address for them to deposit into and thus they want to swap BNB for LOKI.
+    // If the client address is WEGERR then it must mean that we generated a BNB address for them to deposit into and thus they want to swap BNB for WAGERR.
     // Same logic applies the other way
-    const type = addressType === TYPE.LOKI ? SWAP_TYPE.BLOKI_TO_LOKI : SWAP_TYPE.LOKI_TO_BLOKI;
+    const type = addressType === TYPE.WAGERR ? SWAP_TYPE.BWAGERR_TO_WAGERR: SWAP_TYPE.WAGERR_TO_BWAGERR;
 
     // eslint-disable-next-line max-len
     const query = 'insert into swaps(uuid, type, amount, client_account_uuid, deposit_transaction_hash, deposit_transaction_created, created) values (md5(random()::text || clock_timestamp()::text)::uuid, $1, $2, $3, $4, to_timestamp($5), now()) returning uuid, type, amount, deposit_transaction_hash;';
