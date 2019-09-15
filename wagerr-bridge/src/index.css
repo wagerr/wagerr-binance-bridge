@@ -27,10 +27,10 @@ code {
   display: flex;
   flex-direction: column;
   min-width: 100px;
-  background: #008522; /* Old browsers */
-  background: -moz-linear-gradient(-45deg,  #78be20 0%, #008522 50%, #005f61 100%); /* FF3.6-15 */
-  background: -webkit-linear-gradient(-45deg,  #78be20 0%,#008522 50%,#005f61 100%); /* Chrome10-25,Safari5.1-6 */
-  background: linear-gradient(135deg,  #78be20 0%,#008522 50%,#005f61 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  background: #910A0D; /* Old browsers */ 
+  background: -moz-linear-gradient(-45deg,  #e01e03 0%, #b11105 50%, #5f1402 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(-45deg,  #e01e03 0%, #b11105 50%, #5f1402 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(135deg,  #e01e03 0%, #b11105 50%, #5f1402 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
 }
 
 #content {

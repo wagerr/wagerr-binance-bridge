@@ -21,7 +21,7 @@ class DailyLimitHit extends Error {}
 
 const module = {
   // The fees in 1e9 format
-  fees: { [TYPE.WAGERR]: (parseFloat(configFees[TYPE.WAGERR]) * 1e9).toFixed(0) },
+  fees: { [TYPE.WAGERR]: (parseFloat(configFees[TYPE.WAGERR])) },
 
   Errors: { PriceFetchFailed, NoSwapsToProcess, DailyLimitHit },
   /**
@@ -133,8 +133,8 @@ const module = {
    */
   async getCurrentWagerrPriceInUSD() {
     try {
-      const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=wagerr-network&vs_currencies=usd');
-      return response.data['wagerr-network'].usd;
+      const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=wagerr&vs_currencies=usd');
+      return response.data['wagerr'].usd;
     } catch (e) {
       log.debug(e);
       throw new PriceFetchFailed();
@@ -218,13 +218,13 @@ const module = {
       return bnb.multiSend(config.get('binance.mnemonic'), outputs, 'Wagerr Bridge');
     } else if (swapType === SWAP_TYPE.BWAGERR_TO_WAGERR) {
     // Deduct the wagerr withdrawal fees
-      const outputs = transactions.map(({ address, amount }) => {
-        const fee = module.fees[TYPE.WAGERR] || 0;
-        return {
-          address,
-          amount: Math.max(0, amount - fee),
-        };
-      });
+    const fee = module.fees[TYPE.WAGERR] || 0;
+     
+      var outputs = {};
+
+      for(var t in transactions) {
+        outputs[transactions[t].address] = Math.max(0, parseFloat(transactions[t].amount / 1e9) - fee)
+      }
 
       // Send Wagerr to the users
       return wagerr.multiSend(outputs);

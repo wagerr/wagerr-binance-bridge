@@ -39,7 +39,7 @@ const theme =  {
   palette: {
     type: 'dark',
     primary: {
-      main: colors.wagerrGreen
+      main: colors.wagerrRed
     },
     secondary: {
       main: colors.lightBlack
@@ -50,7 +50,7 @@ const theme =  {
     },
     text: {
       primary: colors.gray,
-      secondary: colors.wagerrGreen
+      secondary: colors.wagerrRed
     }
   }
 };

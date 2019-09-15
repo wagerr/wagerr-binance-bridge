@@ -123,7 +123,7 @@ class SwapInfo extends PureComponent {
             to
         </Typography>
         <Typography component={'div'} className={ classes.instructionBold }>
-          <Box id='depositAddress' className={classes.greenBorder}>{depositAddress}</Box>
+          <Box id='depositAddress' className={classes.redBorder}>{depositAddress}</Box>
           <Box>
             <Tooltip title="Copy Address" placement="left">
               <IconButton onClick={() => this.onCopy('depositAddress')} aria-label="Copy Address">

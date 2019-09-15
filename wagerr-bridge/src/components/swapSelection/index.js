@@ -1,11 +1,15 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Grid, Typography, Link } from '@material-ui/core';
+import { Grid, Typography, Link, IconButton, Tooltip, Box } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import { Input, Button, Select } from '@components';
 import { SWAP_TYPE, TYPE } from '@constants';
 import config from '@config';
 import styles from './styles';
+import EmailIcon from '@material-ui/icons/Email';
+import ChatIcon from '@material-ui/icons/Chat';
+
+
 
 const walletCreationUrl = {
   [TYPE.WAGERR]: config.wagerr.walletCreationUrl,
@@ -54,13 +58,14 @@ class SwapSelection extends Component {
 
     const addressType = this.getAddressType();
     const inputLabel = addressType === TYPE.WAGERR ? 'Wagerr Address' : 'BNB Address';
-    const inputPlaceholder = addressType === TYPE.WAGERR ? 'L...' : 'bnb...';
+    const inputPlaceholder = addressType === TYPE.WAGERR ? 'W...' : 'bnb...';
+    const walletLinkMsg = addressType === TYPE.WAGERR ? 'Download the WAGERR wallet here' : "Don't have Binance DEX account? Create one";
 
     const url = walletCreationUrl[addressType];
 
     return (
-      <Grid item xs={ 12 } className={classes.root}>
-        <Grid item xs={ 12 }>
+      <Grid item xs={12} className={classes.root}>
+        <Grid item xs={12}>
           <Select
             fullWidth
             label="Swap Type"
@@ -70,7 +75,7 @@ class SwapSelection extends Component {
             disabled={loading}
           />
         </Grid>
-        <Grid item xs={ 12 }>
+        <Grid item xs={12}>
           <Input
             fullWidth
             label={inputLabel}
@@ -80,13 +85,13 @@ class SwapSelection extends Component {
             onChange={this.onAddressChanged}
             disabled={loading}
           />
-          <Typography className={ classes.createAccount }>
+          <Typography className={classes.createAccount}>
             <Link href={url} target="_blank" rel="noreferrer">
-              Don't have an account? Create one
+              {walletLinkMsg}
             </Link>
           </Typography>
         </Grid>
-        <Grid item xs={ 12 } align='right' className={ classes.button }>
+        <Grid item xs={12} align='right' className={classes.button}>
           <Button
             fullWidth
             label="Next"
@@ -94,6 +99,25 @@ class SwapSelection extends Component {
             onClick={this.onNext}
           />
         </Grid>
+        <Box className={classes.support}>
+
+          <b>Support:</b>
+
+          <Tooltip title="Join Telegram" placement="left">
+            <Link href="https://t.me/Wagerrpublictest" target="_blank" rel="noreferrer">
+              <IconButton aria-label="Telegram">
+                <ChatIcon />
+              </IconButton>
+            </Link>
+          </Tooltip>
+          <Tooltip title="Send Email" placement="right">
+            <Link href="mailto:support@wagerr.com" target="_blank" rel="noreferrer">
+              <IconButton aria-label="Email">
+                <EmailIcon />
+              </IconButton>
+            </Link>
+          </Tooltip>
+        </Box>
       </Grid>
     );
   }

@@ -206,7 +206,7 @@ export async function getUncomfirmedWagerrTransactions(req, res, next) {
   const { uuid } = data;
 
   try {
-    const clientAccount = await db.getClientAccountForUuid(uuid);
+    const clientAccount = await db.getClientAccountForUuid(uuid); 
     const transactions = await transactionHelper.getIncomingWagerrTransactions(clientAccount.account.addressIndex, { pool: true });
     const unconfirmed = transactions.filter(tx => tx.confirmations < transactionHelper.minWagerrConfirmations)
       .map(({ hash, amount, timestamp }) => ({ hash, amount, created: timestamp }));

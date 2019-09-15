@@ -66,9 +66,9 @@ const styles = theme => ({
   red: {
     color: red[500]
   },
-  greenBorder: {
+  redBorder: {
     borderWidth: 1,
-    borderColor: colors.wagerrGreen,
+    borderColor: colors.wagerrRed,
     borderStyle: 'solid',
     padding: theme.spacing(1),
     borderRadius: '4px'

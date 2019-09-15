@@ -10,6 +10,9 @@ const styles = theme => ({
   button: {
     marginTop: '24px'
   },
+  support: {
+    marginTop: '10px'
+  },
   createAccount: {
     fontSize: '0.8rem',
     textDecoration: 'underline',

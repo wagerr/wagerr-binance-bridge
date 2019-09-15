@@ -1,5 +1,5 @@
 /* eslint-disable no-underscore-dangle */
-import http from 'http';
+
 import request from 'request-promise';
 
 /**
@@ -17,9 +17,9 @@ export default class WagerrClient {
     this.wallet = walletConfig;
   }
 
-  async _request(method, params = {}, callCount = 0) {
+  async _request(method, params=[], callCount = 0) {
     const options = {
-      uri: `http://${this.rpc.hostname}:${this.rpc.port}/json_rpc`,
+      uri: `http://${this.rpc.hostname}:${this.rpc.port}`,
       method: 'POST',
       json: {
         jsonrpc: '2.0',
@@ -29,13 +29,9 @@ export default class WagerrClient {
       },
       auth: {
         user: this.rpc.username,
-        pass: this.rpc.password,
-        sendImmediately: false,
-      },
-      agent: new http.Agent({
-        keepAlive: true,
-        maxSockets: 1,
-      }),
+        pass: this.rpc.password
+        
+      }
     };
 
 
@@ -96,21 +92,26 @@ export default class WagerrClient {
     if (data.error) throw new Error(data.error.message);
   }
 
+
+
+ 
+
   /**
    * Create a new sub-address from the current open wallet.
    *
    * @returns {Promise<{ address: string, address_index: number }>} A new wagerr account or `null` if we failed to make one.
    */
   async createAccount() {
-    const data = await this._request('create_address', { account_index: this.accountIndex });
+    const data = await this._request('getnewaddress', [this.accountIndex.toString()]);
     if (data.error) {
       console.log('[Wagerr Wallet] Failed to create account: ', data.error);
       return null;
     }
 
     // eslint-disable-next-line camelcase
-    const { address, address_index } = data.result;
-    return { address, address_index };
+    const address = data.result;
+    const address_index = address; //this is not used anywhere just temporary for DB;
+    return { address , address_index } ;
   }
 
   /**
@@ -120,26 +121,17 @@ export default class WagerrClient {
    * @returns {Promise<[object]>} An array of WAGERR transactions.
    */
   async getIncomingTransactions(addressIndex, options = {}) {
-    const data = await this._request('get_transfers', {
-      in: true,
-      out: false,
-      pending: false,
-      failed: false,
-      pool: options.pool || false,
-      account_index: this.accountIndex,
-      subaddr_indices: [addressIndex],
-    });
+    const data = await this._request('listtransactions', [this.accountIndex.toString()]);
 
     if (data.error) {
       console.log('[Wagerr Wallet] Failed to get transactions: ', data.error);
       return [];
     }
 
-    const incoming = (data.result.in || []);
-    // Set all the confirmations of the pool transactions to 0
-    const pool = (data.result.pool || []).map(t => ({ ...t, confirmations: 0 }));
+   var incoming = (data.result || []).filter(tx => tx.category == 'receive' && tx.address == addressIndex);
+ 
 
-    return [incoming, pool].flat();
+    return incoming;
   }
 
   /**
@@ -148,17 +140,14 @@ export default class WagerrClient {
    * @returns {Promise<boolean>} Wether the given `address` is valid or not.
    */
   async validateAddress(address) {
-    const data = await this._request('validate_address', {
-      address,
-      any_net_type: false,
-    });
+    const data = await this._request('validateaddress', [address]);
 
     if (data.error) {
       console.log('[Wagerr Wallet] Failed to validate address: ', data.error);
       return false;
     }
 
-    return data.result.valid;
+    return data.result.isvalid;
   }
 
   /**
@@ -167,11 +156,8 @@ export default class WagerrClient {
    * @param {[number]} addressIndicies An array of subaddress indicies.
    * @returns {Promise<[{ addressIndex, address, balance, unlocked }]>} An array of balances
    */
-  async getBalances(addressIndicies) {
-    const data = await this._request('getbalance', {
-      account_index: this.accountIndex,
-      address_indices: addressIndicies,
-    });
+  async getBalances() {
+    const data = await this._request('getbalance', [this.accountIndex.toString()]);
 
     if (data.error) {
       console.log('[Wagerr Wallet] Failed to get balances: ', data.error);
@@ -179,12 +165,7 @@ export default class WagerrClient {
     }
 
     // eslint-disable-next-line camelcase
-    return data.result.per_subaddress.map(({ address_index, address, balance, unlocked_balance }) => ({
-      addressIndex: address_index,
-      address,
-      balance,
-      unlocked: unlocked_balance,
-    }));
+    return data.result;
   }
 
   /**
@@ -194,16 +175,13 @@ export default class WagerrClient {
    * @returns {Promise<[string]>} The transaction hashes
    */
   async multiSend(destinations) {
-    const data = await this._request('transfer_split', {
-      destinations,
-      account_index: this.accountIndex,
-    });
+    const data = await this._request('sendmany',[this.accountIndex.toString(),destinations]);
 
     if (data.error || !data.result) {
       const error = (data.error && data.error.message) || 'No result found';
       throw new Error(`[Wagerr Wallet] Failed to send transactions - ${error}`);
     }
 
-    return data.result.tx_hash_list;
+    return [data.result];
   }
 }
