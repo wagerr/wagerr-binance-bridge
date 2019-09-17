@@ -17,15 +17,18 @@ class SwapList extends Component {
   renderHash = (type, txHash, transferTxHashes) => {
     const { classes } = this.props;
 
-    const hasTransferHashes = transferTxHashes.length > 0;
+   
     const depositHashType = type === SWAP_TYPE.WAGERR_TO_BWAGERR ? TYPE.WAGERR : TYPE.BNB;
     const transferHashType = type === SWAP_TYPE.WAGERR_TO_BWAGERR ? TYPE.BNB : TYPE.WAGERR;
-    const hashType = hasTransferHashes ? transferHashType : depositHashType;
-    const baseUrl = hashUrls[hashType];
+    
+    
+    const txBaseUrl = hashUrls[depositHashType];
+    const transferBaseUrl = hashUrls[transferHashType];
+    
+    const txHashes = [txHash];
 
-    const hashes = hasTransferHashes? transferTxHashes : [txHash];
-    const hashItems = hashes.map(hash => {
-      const url = `${baseUrl}/${hash}`;
+    const txHashItems = txHashes.map(hash => {
+      const url = `${txBaseUrl}/${hash}`;
       return (
         <Typography key={hash} className={classes.hash}>
           <Link href={url} target="_blank" rel="noreferrer">
@@ -35,21 +38,30 @@ class SwapList extends Component {
       );
     });
 
-    if(transferTxHashes.length === 0) {
+    const transferHashItems = transferTxHashes.map(hash => {
+      const url = `${transferBaseUrl}/${hash}`;
       return (
-        <Box>
-          <Typography className={classes.hashTitle}>Deposit Transaction Hash</Typography>
-          {hashItems[0]}
-        </Box>
+        <Typography key={hash} className={classes.hash}>
+          <Link href={url} target="_blank" rel="noreferrer">
+            {hash}
+          </Link>
+        </Typography>
       );
-    }
+    });
 
-    const swapTitle = transferTxHashes.length === 1 ? 'Swap Transaction Hash' : 'Swap Transaction Hashes';
+    
     return (
+      <Box>
       <React.Fragment>
-        <Typography className={classes.hashTitle}>{swapTitle}</Typography>
-        {hashItems}
+        <Typography className={classes.hashTitle}>Swap Transaction Hashes</Typography>
+        {transferHashItems}
       </React.Fragment>
+
+       <React.Fragment>
+       <Typography className={classes.hashTitle}>Deposit Transaction Hashes</Typography>
+       {txHashItems}
+     </React.Fragment>
+     </Box>
     );
   }
 

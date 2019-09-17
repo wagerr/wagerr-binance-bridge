@@ -103,7 +103,7 @@ export function finalizeSwap(req, res, next) {
 
       if (!transactions || transactions.length === 0) {
         res.status(205);
-        res.body = { status: 200, success: false, result: 'Unable to find a deposit' };
+        res.body = { status: 200, success: false, result: 'Awaiting new deposit' };
         return next(null, req, res, next);
       }
 
@@ -111,7 +111,7 @@ export function finalizeSwap(req, res, next) {
       const newTransactions = transactions.filter(tx => !swaps.find(s => s.deposit_transaction_hash === tx.hash));
       if (newTransactions.length === 0) {
         res.status(205);
-        res.body = { status: 200, success: false, result: 'Unable to find any new deposits' };
+        res.body = { status: 200, success: false, result: 'Awaiting new deposits' };
         return next(null, req, res, next);
       }
 

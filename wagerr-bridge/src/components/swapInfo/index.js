@@ -147,6 +147,7 @@ class SwapInfo extends PureComponent {
     const { swapType, classes, info } = this.props;
 
     const wagerrFee = (info && info.fees && info.fees.wagerr / 1e9) || 0;
+    const bnbFee = (info && info.fees && info.fees.bnb / 1e9) || 0;
     let wagerrConfirmations = (info && info.minWagerrConfirmations);
     if (typeof wagerrConfirmations != 'number') { wagerrConfirmations = '-'; }
 
@@ -155,7 +156,8 @@ class SwapInfo extends PureComponent {
         {this.renderDepositInstructions()}
         { swapType === SWAP_TYPE.WAGERR_TO_BWAGERR && (
           <Typography className={ classes.instructions }>
-            <b>Note:</b> You will have to wait for there to be atleast {wagerrConfirmations} confirmations before your added to our processing queue.
+            <b>Note:</b> You will have to wait for there to be atleast {wagerrConfirmations} confirmations before your added to our processing queue. <br/>
+            There will be a processing fee of {bnbFee} B-WAGERR which will be charged when processing all your pending swaps.          
           </Typography>
         )}
         { swapType === SWAP_TYPE.BWAGERR_TO_WAGERR && (

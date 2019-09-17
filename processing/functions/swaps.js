@@ -8,7 +8,10 @@ import { db, bnb, wagerr } from '../core';
 import log from '../utils/log';
 
 // The fees in decimal format
-const configFees = { [TYPE.WAGERR]: config.get('wagerr.withdrawalFee') };
+const configFees = { 
+ [TYPE.WAGERR]: config.get('wagerr.withdrawalFee') ,
+ [TYPE.BNB]: config.get('binance.withdrawalFee') }
+ ;
 
 const symbols = {
   [TYPE.WAGERR]: 'WAGERR',
@@ -21,7 +24,10 @@ class DailyLimitHit extends Error {}
 
 const module = {
   // The fees in 1e9 format
-  fees: { [TYPE.WAGERR]: (parseFloat(configFees[TYPE.WAGERR])) },
+  fees: { 
+    [TYPE.WAGERR]: (parseFloat(configFees[TYPE.WAGERR]) * 1e9).toFixed(0),
+    [TYPE.BNB]: (parseFloat(configFees[TYPE.BNB]) * 1e9).toFixed(0) 
+  },
 
   Errors: { PriceFetchFailed, NoSwapsToProcess, DailyLimitHit },
   /**
@@ -206,24 +212,25 @@ const module = {
   // Multi-send always returns an array of hashes
     if (swapType === SWAP_TYPE.WAGERR_TO_BWAGERR) {
       const symbol = config.get('binance.symbol');
+      const fee = module.fees[TYPE.BNB] || 0;
       const outputs = transactions.map(({ address, amount }) => ({
         to: address,
         coins: [{
           denom: symbol,
-          amount,
+          amount: amount - fee,
         }],
       }));
 
       // Send BNB to the users
       return bnb.multiSend(config.get('binance.mnemonic'), outputs, 'Wagerr Bridge');
     } else if (swapType === SWAP_TYPE.BWAGERR_TO_WAGERR) {
-    // Deduct the wagerr withdrawal fees
+    // Deduct the wagerr withdrawal fees , accept float value
     const fee = module.fees[TYPE.WAGERR] || 0;
      
       var outputs = {};
 
       for(var t in transactions) {
-        outputs[transactions[t].address] = Math.max(0, parseFloat(transactions[t].amount / 1e9) - fee)
+        outputs[transactions[t].address] = Math.max(0, parseFloat(transactions[t].amount - fee) / 1e9)
       }
 
       // Send Wagerr to the users

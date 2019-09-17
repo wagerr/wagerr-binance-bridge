@@ -3,7 +3,8 @@
     "database": "wagerrbridge-test"
   },
   "binance": {
-    "symbol": "TEST"
+    "symbol": "TEST",
+    "withdrawalFee": 0.5
   },
   "wagerr": {
     "minConfirmations": 6,

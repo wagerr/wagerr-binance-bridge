@@ -3,7 +3,8 @@
   "useAPIEncryption": true,
   "binance": {
     "api": "https://dex.binance.org",
-    "network": "mainnet"
+    "network": "mainnet",
+    "withdrawalFee": 0.5
   },
   "database": {
     "user": "",
@@ -16,11 +17,7 @@
       "username": "",
       "password": ""
     },
-    "wallet": {
-      "filename": "My production wallet",
-      "password": ""
-    },
     "minConfirmations": 12,
-    "withdrawalFee": 5
+    "withdrawalFee": 0.02
   }
 }

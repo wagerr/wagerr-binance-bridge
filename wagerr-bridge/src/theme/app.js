@@ -46,7 +46,7 @@ const theme =  {
     },
     background:{
       paper: colors.wagerrBlack80,
-      default: '#008522'
+      default: colors.wagerrRed
     },
     text: {
       primary: colors.gray,
