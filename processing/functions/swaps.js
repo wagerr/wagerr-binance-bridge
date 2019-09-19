@@ -175,7 +175,7 @@ const module = {
     const totalAmount = transactionAmount - totalFee;
 
     return {
-      validSwaps,
+      swaps:validSwaps,
       totalAmount,
       totalFee,
     };
