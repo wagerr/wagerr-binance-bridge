@@ -100,7 +100,7 @@ Any values that you don't set in those files will be fetched from `config/defaul
 | network | The binance network (testnet/production) |
 | symbol | The symbol of the token you are swapping |
 | depositAddress | The address to where users will deposit the binance currency to |
-
+| withdrawalFee | The amount of wagerr to deduct upon withdrawing |
 #### Database
 | Property | Description |
 | --- | --- |

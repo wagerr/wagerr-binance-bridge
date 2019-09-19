@@ -4,8 +4,9 @@
   "binance": {
     "api": "https://testnet-dex.binance.org",
     "network": "testnet",
-    "symbol": "BWAGERR",
-    "depositAddress": ""
+    "symbol": "WGR-B36",
+    "depositAddress": "tbnb1ktcrqes7dr3t99cpdrkwc0nz2qal2kgp30t6j9",
+    "withdrawalFee": 0.5
   },
   "database": {
     "host": "localhost",
@@ -18,16 +19,15 @@
   "wagerr": {
     "walletRPC": {
       "host": "localhost",
-      "port": 18082,
+      "port": 55003,
       "username": "",
       "password": ""
     },
     "wallet": {
-      "filename": "wagerrbridge",
       "password": "",
       "accountIndex": 0
     },
-    "minConfirmations": 12,
-    "withdrawalFee": 5
+    "minConfirmations": 1,
+    "withdrawalFee": 0.02
   }
 }

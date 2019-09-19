@@ -1,7 +1,7 @@
 import config from 'config';
 import { clients } from 'bridge-core';
 
-
+const { password: walletPassword , accountIndex} = config.get('wagerr.wallet');
 const { host, port, username, password: rpcPassword } = config.get('wagerr.walletRPC');
 
 const rpc = {
@@ -11,6 +11,10 @@ const rpc = {
   password: rpcPassword,
 };
 
+const wallet =  {
+  password: walletPassword,
+  accountIndex
 
+};
 
-export default new clients.WagerrClient(rpc, null);
+export default new clients.WagerrClient(rpc, wallet);

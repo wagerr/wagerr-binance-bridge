@@ -14,7 +14,7 @@ export default class WagerrClient {
   constructor(rpcConfig, walletConfig = null) {
     this.rpc = rpcConfig;
     this.accountIndex = (walletConfig && walletConfig.accountIndex) || 0;
-    this.wallet = walletConfig;
+    this.wallet = walletConfig ; 
   }
 
   async _request(method, params=[], callCount = 0) {
@@ -31,7 +31,8 @@ export default class WagerrClient {
         user: this.rpc.username,
         pass: this.rpc.password
         
-      }
+      },
+      simple:false
     };
 
 
@@ -39,7 +40,7 @@ export default class WagerrClient {
       const response = await request(options);
       if (response.error) {
         // If wallet is not opened, then open it and call the rpc
-        if (this.wallet && method !== 'close_wallet' && response.error.message === 'No wallet file') {
+        if (this.wallet && response.error.code == -13 && response.error.message === 'Error: Please enter the wallet passphrase with walletpassphrase first.') {
           await this.openWallet();
 
           // Make sure we're not forever opening the wallet
@@ -81,14 +82,12 @@ export default class WagerrClient {
     if (!this.wallet) return;
 
     // close any open wallet
-    await this._request('close_wallet');
+    await this._request('walletlock');
 
-    const { filename, password } = this.wallet;
+    const { password } = this.wallet;
 
-    const data = await this._request('open_wallet', {
-      filename,
-      password,
-    });
+    const data = await this._request('walletpassphrase', [password , 60]);
+
     if (data.error) throw new Error(data.error.message);
   }
 
@@ -128,7 +127,7 @@ export default class WagerrClient {
       return [];
     }
 
-   var incoming = (data.result || []).filter(tx => tx.category == 'receive' && tx.address == addressIndex);
+   var incoming = (data.result || []).filter(tx => tx.category == 'receive' && tx.address === addressIndex);
  
 
     return incoming;

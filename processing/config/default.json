@@ -1,12 +1,13 @@
 {
   "dailyLimit": 100,
-  "autoRunInterval": 10,
+  "autoRunInterval": 0.2,
   "binance": {
     "api": "https://testnet-dex.binance.org",
     "network": "testnet",
-    "symbol": "BWAGERR",
-    "mnemonic": ""
-  },
+    "symbol": "WGR-B36",
+    "mnemonic": "figure dream sign nice slow smile million shoe tag disagree vague blouse announce boring exclude loop off palace unlock floor armor flush limb feed",
+    "withdrawalFee": 0.5
+    },
   "database": {
     "host": "localhost",
     "port": 5432,
@@ -18,11 +19,15 @@
   "wagerr": {
     "walletRPC": {
       "host": "localhost",
-      "port": 18082,
+      "port": 55003,
       "username": "",
       "password": ""
     },
-    "minConfirmations": 12,
-    "withdrawalFee": 5
+    "wallet": {
+      "password": "",
+      "accountIndex": 0
+    },
+    "minConfirmations": 1,
+    "withdrawalFee": 0.02
   }
 }

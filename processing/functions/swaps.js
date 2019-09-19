@@ -154,8 +154,11 @@ const module = {
    * @returns {{ swaps, totalAmount, totalFee }} The completed swap info.
    */
   async processSwaps(swaps, swapType) {
-    const ids = swaps.map(s => s.uuid);
-    const transactions = module.getTransactions(swaps);
+
+    const validSwaps = module.getValidSwaps(swaps);
+
+    const ids = validSwaps.map(s => s.uuid);
+    const transactions = module.getTransactions(validSwaps);
 
     if (!transactions || transactions.length === 0) throw new NoSwapsToProcess();
 
@@ -172,11 +175,50 @@ const module = {
     const totalAmount = transactionAmount - totalFee;
 
     return {
-      swaps,
+      validSwaps,
       totalAmount,
       totalFee,
     };
   },
+
+
+ /**
+   * Get all the swaps which are not invalid.
+   *
+   *  a swap is invalid if:
+   *  The total amount from an address is less than the fee
+   *
+   * @param {[{ uuid, amount, address }]} swaps The swaps
+   * @returns The valid swaps.
+   */
+  getValidSwaps(swaps) {
+  
+
+    // If it's BLOKI_TO_LOKI we need to sum up the swaps values and check that they're greater than the loki fee
+    const transactions = module.getTransactions(swaps);
+
+    // A transaction is invalid if the amount - fee is negative
+
+    const invalidWagerrTransactions = transactions.filter(({ amount }) => {
+      const fee = module.fees[TYPE.WAGERR] || 0;
+      return (amount - fee) <= 0;
+    });
+
+    const invalidBNBTransactions = transactions.filter(({ amount }) => {
+      const fee = module.fees[TYPE.BNB] || 0;
+      return (amount - fee) <= 0;
+    }); 
+
+
+    const invalidTransactions = invalidWagerrTransactions.concat(invalidBNBTransactions);
+
+    // Get the swaps which don't have the invalid transaction addresses
+    const invalidAddresses = invalidTransactions.map(t => t.address);
+    return swaps.filter(s => !invalidAddresses.includes(s.address));
+  },
+
+
+
 
   /**
    * Take an array of `swaps` and combine the ones going to the same `address`.
@@ -222,7 +264,7 @@ const module = {
       }));
 
       // Send BNB to the users
-      return bnb.multiSend(config.get('binance.mnemonic'), outputs, 'Wagerr Bridge');
+      return bnb.multiSend(config.get('binance.mnemonic'), outputs, '');
     } else if (swapType === SWAP_TYPE.BWAGERR_TO_WAGERR) {
     // Deduct the wagerr withdrawal fees , accept float value
     const fee = module.fees[TYPE.WAGERR] || 0;

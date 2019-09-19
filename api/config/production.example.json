@@ -17,6 +17,10 @@
       "username": "",
       "password": ""
     },
+    "wallet": {
+      "password": "",
+      "accountIndex": 0
+    },
     "minConfirmations": 12,
     "withdrawalFee": 0.02
   }

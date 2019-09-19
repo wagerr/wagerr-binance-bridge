@@ -42,7 +42,7 @@ export default class TransactionHelper {
         const transactions = await this.getIncomingWagerrTransactions(addressIndex);
         return transactions
           .filter(tx => tx.confirmations >= this.minWagerrConfirmations)
-          .map(({ hash, amount, time }) => ({ hash, amount, time }));
+          .map(({ hash, amount, timestamp }) => ({ hash, amount, timestamp }));
       }
       default:
         return [];
@@ -76,6 +76,7 @@ export default class TransactionHelper {
       ...tx,
       hash: tx.txid,
       amount: (parseFloat(tx.amount) * 1e9).toFixed(0),
+      timestamp:tx.time
     }));
   }
 }
