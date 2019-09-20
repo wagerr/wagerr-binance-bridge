@@ -18,7 +18,7 @@ Install all the dependencies:
 npm install
 ```
 
-Edit `config/config.js` with your required settings.
+Copy production.example.js to config.js. Edit `config/config.js` with your required settings.
 
 ### Development
 
