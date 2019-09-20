@@ -38,6 +38,10 @@ const styles = theme => ({
   emptyTitle: {
     padding: theme.spacing(1, 0),
     color: '#c8c8c8'
+  },
+  gridList: {
+    width: '100%',
+    height: 550,
   }
 });
 

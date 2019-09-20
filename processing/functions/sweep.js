@@ -62,7 +62,7 @@ const module = {
 
     // Get all our incoming transactions which contain a memo
     const transactions = await transactionHelper.getIncomingBNBTransactions(ourAddress);
-    const memoTransactions = transactions.filter(t => t.memo && t.memo.length > 0);
+    const memoTransactions = transactions.filter(t => t.memo && t.memo.length == 64);
 
     // Get all the deposit hases from the db
     const hashes = await db.getAllSwapDepositHashes(SWAP_TYPE.BWAGERR_TO_WAGERR);
