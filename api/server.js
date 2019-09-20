@@ -106,11 +106,13 @@ app.use((err, req, res, next) => {
 });
 
 https.globalAgent.maxSockets = 50;
+app.set('hostname', config.get('hostname'));
 app.set('port', config.get('serverPort'));
+
 
 wagerr.openWallet().then(() => {
   const server = Server(app);
-  server.listen(app.get('port'), () => {
+  server.listen(app.get('port'),app.get('hostname'), () => {
     console.log('[Wagerr Bridge API] Stared server on', server.address().port);
   });
 }).catch(error => {

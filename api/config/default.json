@@ -1,5 +1,6 @@
 {
   "serverPort": 8000,
+  "hostname": "localhost",
   "useAPIEncryption": false,
   "binance": {
     "api": "https://testnet-dex.binance.org",
