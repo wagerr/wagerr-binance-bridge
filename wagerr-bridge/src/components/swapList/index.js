@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import TimeAgo from 'timeago-react';
 import dateformat from 'dateformat';
-import { Grid, Typography, Box, Divider, Link } from '@material-ui/core';
+import { Grid, Typography, Box, Divider, Link, GridList } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import config from '@config';
 import { SWAP_TYPE, TYPE } from '@constants';
@@ -133,9 +133,11 @@ class SwapList extends Component {
 
     return (
       <Grid item xs={ 12 } className={classes.root}>
-        <Grid container direction="column" spacing={1}>
+        
+        <GridList className={classes.gridList} >
           {this.renderSwaps()}
-        </Grid>
+          </GridList>
+       
       </Grid>
     );
   }

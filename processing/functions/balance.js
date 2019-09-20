@@ -146,7 +146,7 @@ const module = {
       // Only get the transactions with memos that we have
       const memoTransactions = transactions.filter(t => {
         const { memo } = t;
-        return memo && memo.length > 0 && clientMemos.includes(memo);
+        return memo && memo.length == 64 && clientMemos.includes(memo);
       });
 
       // Filter out all transactions that don't fit our date ranges
@@ -165,7 +165,7 @@ const module = {
     const clientMemos = bnbClientAccounts.filter(c => c.account.memo);
     const unkownMemoTransactions = transactions.filter(t => {
       const { memo } = t;
-      return memo && memo.length > 0 && !clientMemos.includes(memo);
+      return memo && memo.length == 64 && !clientMemos.includes(memo);
     });
 
     const values = unkownMemoTransactions.map(({ hash, amount, memo, timestamp }) => ({
